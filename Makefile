@@ -20,7 +20,7 @@ LIGHTGRAY		= \033[0;37m
 GREEN			= \033[0;32m
 GRAYDRK			= \033[0;30m
 
-SRC 		= # /// ADD /// 
+SRC 		= main.cpp\
 
 OBJS_DIR	= ./objs/
 OBJS 		= ${addprefix ${OBJS_DIR}, $(SRC:.cpp=.o)}
