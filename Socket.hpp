@@ -17,7 +17,7 @@
 
 class Socket {
 public:
-  Socket();
+  Socket(const std::string &password);
   ~Socket();
 
   bool Create(int port);
@@ -28,11 +28,13 @@ public:
   int Receive(char *buffer, int bufferSize);
 
   void Close();
+  void CloseClient();
 
 private:
   int serverSocket;
   int clientSocket;
   int port;
+  std::string password;
 };
 
 #endif

@@ -38,7 +38,8 @@ int main(int ac, char **av) {
 
   int port = myAtoi(av[1]);
 
-  Socket socket;
+  string pass = string(av[2]);
+  Socket socket(pass);
   if (!socket.Create(port) || !socket.Bind() || !socket.Listen(7)) {
     return 1;
   }
