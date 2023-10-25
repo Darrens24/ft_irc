@@ -103,10 +103,10 @@ int Socket::Receive(char *buffer, int bufferSize) {
 }
 
 void Socket::Close() {
-  if (serverSocket != -1) {
-    close(serverSocket);
-  }
   if (clientSocket != -1) {
     close(clientSocket);
+  }
+  if (serverSocket != -1) {
+    close(serverSocket);
   }
 }
