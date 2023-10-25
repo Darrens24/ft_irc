@@ -26,6 +26,10 @@ Socket::Socket() : serverSocket(-1), clientSocket(-1), port(-1) {}
 
 Socket::~Socket() { Close(); }
 
+int Socket::getServerSocket() const { return serverSocket; }
+
+int Socket::getClientSocket() const { return clientSocket; }
+
 bool Socket::Create(int port) {
   this->port = port;
 

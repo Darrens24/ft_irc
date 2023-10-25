@@ -10,6 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Server.hpp"
 #include "Socket.hpp"
 #include <iostream>
 #include <string>
@@ -36,37 +37,36 @@ int main(int ac, char **av) {
     return 1;
   }
 
-  int port = myAtoi(av[1]);
+  cout << "HEY" << endl;
 
   Socket socket;
-  if (!socket.Create(port) || !socket.Bind() || !socket.Listen(7)) {
-    return 1;
-  }
 
-  if (!socket.Accept()) {
-    return 1;
-  }
+  socket.Create(myAtoi(av[1]));
+  socket.Bind();
+  socket.Listen(1000);
+  cout << "Listening on port " << av[1] << endl;
 
-  if (!socket.Send("hello\n")) {
-    return 1;
-  }
-
-  cout << "Hello message sent" << endl;
+  Server server(socket, av[2]);
 
   while (true) {
-    char buffer[1024] = {0};
-    int receivedBytes = socket.Receive(buffer, 1024);
-    if (receivedBytes < 0) {
-      return 1;
-    }
+    socket.Accept();
+    User user(socket);
+    cout << "Accepted !!" << endl;
+    server.initChecker(user);
+    cout << "Oveeeer" << endl;
+    // char buffer[1024] = {0};
+    // int receivedBytes = socket.Receive(buffer, 1024);
+    // if (receivedBytes < 0) {
+    //   return 1;
+    // }
 
-    if (receivedBytes > 0) {
-      cout << buffer;
-      if (string(buffer) == "exit\n") {
-        cout << "Exiting" << endl;
-        break;
-      }
-    }
+    // if (receivedBytes > 0) {
+    //   cout << buffer;
+    //   if (string(buffer) == "exit\n") {
+    //     cout << "Exiting" << endl;
+    //     break;
+    //   }
+    // }
   }
 
   return 0;
