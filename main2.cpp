@@ -10,11 +10,12 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Channel.hpp"
 #include "Server.hpp"
 #include "Socket.hpp"
+#include <cstring>
 #include <iostream>
 #include <string>
+#include <unistd.h>
 
 using namespace std;
 
@@ -55,6 +56,30 @@ int main(int ac, char **av) {
     cout << "Accepted !!" << endl;
     server.initChecker(user);
     user.init();
+
+    char buffer[1024] = {0};
+    ssize_t bytes_received = recv(user.getSocketClient(), buffer, 1024, 0);
+    if (bytes_received < 0) {
+      std::cout << RED "Recv failed" NC << std::endl;
+      return -1;
+    }
+    for (ssize_t i = 0; i < bytes_received; ++i) {
+      if (buffer[i] == '\n' || buffer[i] == '\r') {
+        buffer[i] = '\0';
+        break;
+      }
+    }
+    std::cout << "Received: " << buffer << std::endl;
+    // if (!strcmp(buffer, "JOIN")) {
+    string tmp = string(buffer);
+    if (strlen(buffer) < 6) {
+      send(user.getSocketClient(), "Error: No channel specified.\n", 28, 0);
+      break;
+    }
+    std::cout << "wouhou" << std::endl;
+    server.createChannel(tmp.substr(5, strlen(buffer)));
+    break;
+    // }
 
     // char buffer[1024] = {0};
     // int receivedBytes = socket.Receive(buffer, 1024);

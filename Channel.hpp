@@ -10,15 +10,14 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CHANNEL_HPP
-#define CHANNEL_HPP
+#pragma once
 
-#include "Server.hpp"
 #include "User.hpp"
 #include "colors.hpp"
 #include <arpa/inet.h>
 #include <cstring>
 #include <iostream>
+#include <map>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <poll.h>
@@ -42,5 +41,3 @@ public:
   // methodes
   int addUser(User &u);
 };
-
-#endif

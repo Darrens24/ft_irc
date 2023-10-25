@@ -67,6 +67,7 @@ int User::init() {
       break;
     }
   }
+
   return 0;
 }
 

@@ -10,15 +10,16 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef SERVER_HPP
-#define SERVER_HPP
+#pragma once
 
+#include "Channel.hpp"
 #include "Socket.hpp"
 #include "User.hpp"
 #include "colors.hpp"
 #include <arpa/inet.h>
 #include <cstring>
 #include <iostream>
+#include <map>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <poll.h>
@@ -35,6 +36,7 @@ private:
   std::string _serverName;
   std::string _password;
   std::vector<User> _users;
+  std::map<std::string, Channel> _channels;
 
 public:
   // canonical form
@@ -45,6 +47,6 @@ public:
 
   // methodes
   int initChecker(User &u);
+  int createChannel(std::string name);
+  int joinChannel(std::string name, User &u);
 };
-
-#endif

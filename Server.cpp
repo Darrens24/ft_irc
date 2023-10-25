@@ -15,15 +15,11 @@
 Server::Server(Socket &sock, std::string password)
     : _socket(sock), _password(password) {}
 
-Server::~Server() {
-  // Destructeur : libération de ressources si nécessaire
-}
+Server::~Server() {}
 
 Server::Server(const Server &cpy)
     : _serverName(cpy._serverName), _password(cpy._password),
-      _users(cpy._users) {
-  // Constructeur de copie
-}
+      _users(cpy._users) {}
 
 Server &Server::operator=(const Server &e) {
   if (this == &e) {
@@ -64,4 +60,22 @@ int Server::initChecker(User &u) {
       send(u.getSocketClient(), "Wrong password.\n", 16, 0);
   }
   return 0;
+}
+
+int Server::createChannel(std::string channelName) {
+  Channel newChannel(channelName);
+  _channels.insert(std::make_pair(channelName, newChannel));
+  this->_channels.end()->second.addUser(_users.back());
+  return 0;
+}
+
+int Server::joinChannel(std::string channelName, User &u) {
+  std::map<std::string, Channel>::iterator it = _channels.find(channelName);
+  if (it != _channels.end()) {
+    it->second.addUser(u);
+    return (0);
+  } else {
+    // message erreur car pas de canal a ce nom
+    return (-1);
+  }
 }
