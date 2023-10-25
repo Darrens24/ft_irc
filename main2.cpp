@@ -10,6 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Channel.hpp"
 #include "Server.hpp"
 #include "Socket.hpp"
 #include <iostream>
