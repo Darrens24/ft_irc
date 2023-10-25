@@ -53,7 +53,8 @@ int main(int ac, char **av) {
     User user(socket);
     cout << "Accepted !!" << endl;
     server.initChecker(user);
-    cout << "Oveeeer" << endl;
+    user.init();
+
     // char buffer[1024] = {0};
     // int receivedBytes = socket.Receive(buffer, 1024);
     // if (receivedBytes < 0) {

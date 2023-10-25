@@ -38,39 +38,35 @@ User &User::operator=(const User &e) {
 
 int User::init() {
   _username = "";
+  char buffer[1024] = {0};
   send(_socketClient, "Enter username.\n", 17, 0);
   while (_username.empty()) {
-    char buffer[1024] = {0};
-
-    if (_ret > 0) {
-      ssize_t bytes_received = recv(_socketClient, buffer, 1024, 0);
-      if (bytes_received < 0) {
-        std::cout << RED "Recv failed" NC << std::endl;
-        close(_socketClient);
-        return 1;
-      }
-
-      for (ssize_t i = 0; i < bytes_received; ++i) {
-        if (buffer[i] == '\n' || buffer[i] == '\r') {
-          buffer[i] = '\0';
-          break;
-        }
-      }
-
-      _username = std::string(buffer);
-      if (_username.empty()) {
-        std::cout << "Username cannot be empty. Please enter again."
-                  << std::endl;
-        send(_socketClient, "Username cannot be empty. Please enter again.\n",
-             44, 0);
-      } else {
-        send(_socketClient, "username is : ", 15, 0);
-        send(_socketClient, _username.c_str(), _username.length(), 0);
+    ssize_t bytes_received = recv(this->_socketClient, buffer, 1024, 0);
+    if (bytes_received < 0) {
+      std::cout << RED "Recv failed" NC << std::endl;
+      close(_socketClient);
+      return -1;
+    }
+    for (ssize_t i = 0; i < bytes_received; ++i) {
+      if (buffer[i] == '\n' || buffer[i] == '\r') {
+        buffer[i] = '\0';
         break;
       }
     }
+
+    _username = std::string(buffer);
+    if (_username.empty()) {
+      std::cout << "Username cannot be empty. Please enter again." << std::endl;
+      send(_socketClient, "Username cannot be empty. Please enter again.\n", 44,
+           0);
+    } else {
+      std::cout << "username is : " << _username << std::endl;
+      send(_socketClient, "username is : ", 15, 0);
+      send(_socketClient, _username.c_str(), _username.length(), 0);
+      send(_socketClient, "\n", 1, 0);
+      break;
+    }
   }
-  close(_socketClient);
   return 0;
 }
 
