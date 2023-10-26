@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: pfaria-d <pfaria-d@student.42nice.fr>      +#+  +:+       +#+         #
+#    By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/06/08 19:50:26 by pfaria-d          #+#    #+#              #
-#    Updated: 2023/06/23 19:42:04 by pfaria-d         ###   ########.fr        #
+#    Updated: 2023/10/26 20:14:18 by feliciencat      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,7 +26,8 @@ SRC 		= main2.cpp\
 					User.cpp\
 					Channel.cpp\
 					Command.cpp\
-					Join.cpp
+					Join.cpp \
+					Privmsg.cpp \
 
 OBJS_DIR	= ./objs/
 OBJS 		= ${addprefix ${OBJS_DIR}, $(SRC:.cpp=.o)}

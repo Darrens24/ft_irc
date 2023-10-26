@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 12:44:53 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/26 16:57:59 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/26 20:15:05 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,10 +42,12 @@ public:
   // methodes
   int addUser(User *u);
   int isInChannel(User *u);
+  
   // setters
   void setOwner(User *u);
 
   // getters
   User *getOwner();
   std::string getChannelName();
+  std::vector<User *> &getUsersOfChannel();
 };

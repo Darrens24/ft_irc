@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 14:57:54 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/25 15:35:26 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/26 20:12:23 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ Server::Server(int port, std::string password)
 
   this->_address.sin_family = AF_INET;
   this->_address.sin_addr.s_addr = INADDR_ANY;
-  this->_address.sin_port = htons(port);
+  this->_address.sin_port = htons(this->_port);
   this->_addrLen = sizeof(this->_address);
 
   if (bind(this->_socket, (struct sockaddr *)&this->_address,
@@ -90,7 +90,7 @@ Server &Server::operator=(const Server &e) {
 void Server::start() {
   pollfd serverPoll;
   serverPoll.fd = this->_socket;
-  serverPoll.events = POLLIN | POLLHUP | POLLRDHUP;
+  serverPoll.events = POLLIN | POLLHUP;
   serverPoll.revents = 0;
 
   this->_polls.push_back(serverPoll);
@@ -104,7 +104,7 @@ void Server::start() {
     }
 
     for (long unsigned int i = 0; i < this->_polls.size(); i++) {
-      if (this->_polls[i].revents & POLLRDHUP) {
+      if (this->_polls[i].revents & POLLHUP) {
         std::cout << RED "Client disconnected" NC << std::endl;
         close(this->_polls[i].fd);
         this->_polls.erase(this->_polls.begin() + i);
@@ -125,7 +125,7 @@ void Server::start() {
 
 void Server::readFromClient(int fd, int i) {
   char buffer[1024];
-  // memset(buffer, 0, 1024);
+  
 
   ssize_t read = recv(fd, buffer, 1024, 0);
   if (read < 0) {
@@ -158,7 +158,13 @@ void Server::launchParser(char buffer[1024], int fd) {
     Join join(this);
     join.execute(this->_users[fd], array);
   }
+    
+  if (array[0] == "PRIVMSG") {
+    Privmsg privmsg(this);
+    privmsg.execute(this->_users[fd], array);
+  }
 }
+
 
 void Server::acceptNewClient() {
   int fd = accept(this->_socket, (struct sockaddr *)&this->_address,
@@ -170,7 +176,7 @@ void Server::acceptNewClient() {
   std::cout << GRN "New client accepted" NC << std::endl;
   pollfd newPoll;
   newPoll.fd = fd;
-  newPoll.events = POLLIN | POLLHUP | POLLRDHUP;
+  newPoll.events = POLLIN | POLLHUP | POLLHUP;
   newPoll.revents = 0;
   this->_polls.push_back(newPoll);
 
@@ -189,7 +195,7 @@ void Server::acceptNewClient() {
             << std::endl;
 
   if (this->initChecker(fd) == -1) {
-    close(fd);
+   close(fd);
   }
 
   User *newUser;
@@ -202,14 +208,24 @@ void Server::acceptNewClient() {
 }
 
 void Server::askUserData(int fd) {
-  send(fd, "Enter your nickname : ", 22, 0);
-  char buffer[1000];
-  ssize_t bytes_received = recv(fd, buffer, 1000, 0);
-  if (bytes_received < 0) {
-    std::cout << RED "Recv failed" NC << std::endl;
-    close(fd);
-    return;
-  }
+    send(fd, "Enter your nickname : \n", 24, 0);
+    char buffer[1024];
+    ssize_t bytes_received = -1;
+    while (bytes_received < 0)
+    {
+      bytes_received = recv(fd, buffer, 1024, 0);
+      if (bytes_received < 0)
+      {
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+          continue;
+        }
+        std::cout << RED "Recv failed with errno: " << errno << NC << std::endl;
+        perror("recv");
+        close(fd);
+        return;
+      }
+    }
+
 
   for (ssize_t i = 0; i < bytes_received; ++i) {
     if (buffer[i] == '\n' || buffer[i] == '\r') {
@@ -221,12 +237,21 @@ void Server::askUserData(int fd) {
   this->_users[fd]->setNickname(buffer);
   std::cout << GRN "Nickname set to " << buffer << NC << std::endl;
   send(fd, "Enter your username : ", 22, 0);
-  bytes_received = recv(fd, buffer, 1000, 0);
-  if (bytes_received < 0) {
-    std::cout << RED "Recv failed" NC << std::endl;
-    close(fd);
-    return;
-  }
+  bytes_received = -1;
+    while (bytes_received < 0)
+    {
+      bytes_received = recv(fd, buffer, 1024, 0);
+      if (bytes_received < 0)
+      {
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+          continue;
+        }
+        std::cout << RED "Recv failed with errno: " << errno << NC << std::endl;
+        perror("recv");
+        close(fd);
+        return;
+      }
+    }
 
   for (ssize_t i = 0; i < bytes_received; ++i) {
     if (buffer[i] == '\n' || buffer[i] == '\r') {
@@ -249,13 +274,22 @@ void Server::askUserData(int fd) {
 int Server::initChecker(int fd) {
   char buffer[1000];
 
-  send(fd, "Enter password : ", 17, 0);
-  ssize_t bytes_received = recv(fd, buffer, 1000, 0);
-  if (bytes_received < 0) {
-    std::cout << RED "Recv failed" NC << std::endl;
-    close(fd);
-    return -1;
-  }
+  send(fd, "Enter password : ", 18, 0);
+  ssize_t bytes_received = -1;
+    while (bytes_received < 0)
+    {
+      bytes_received = recv(fd, buffer, 1024, 0);
+      if (bytes_received < 0)
+      {
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+          continue;
+        }
+        std::cout << RED "Recv failed with errno: " << errno << NC << std::endl;
+        perror("recv");
+        close(fd);
+        return -1;
+      }
+    }
 
   for (ssize_t i = 0; i < bytes_received; ++i) {
     if (buffer[i] == '\n' || buffer[i] == '\r') {
@@ -290,5 +324,7 @@ int Server::joinChannel(std::string channelName, User *u) {
   } else
     return -1;
 }
+
+std::string sendMsgToChannel(std::string target ,std::string msg, User *u);
 
 std::map<std::string, Channel *> &Server::getChannel() { return _channels; }

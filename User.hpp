@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 12:44:53 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/26 15:56:20 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/26 20:10:24 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,16 +41,13 @@ public:
   User(const User &cpy);
   User &operator=(const User &e);
 
-  // methodes
-  // int init();
-  // int acceptConnection(int socketServer);
-
   // setters
   void setNickname(std::string nickname);
   void setUsername(std::string username);
 
   // getters
   std::string getNickname() const { return _nickname; }
+  int getFd() { return _fd; }
   // int getSocketClient();
   // struct sockaddr_in getAddrClient();
   // socklen_t getAddrClientSize();

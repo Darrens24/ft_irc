@@ -30,3 +30,11 @@ public:
 
   void execute(User *client, std::vector<std::string> args);
 };
+
+class Privmsg : public Command {
+public:
+  Privmsg(Server *srv);
+  ~Privmsg();
+
+  void execute(User *client, std::vector<std::string> args);
+};
