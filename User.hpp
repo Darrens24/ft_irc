@@ -28,29 +28,28 @@
 
 class User {
 private:
-  int _socketClient;
-  struct sockaddr_in _addrClient;
-  socklen_t _addrClientSize;
-  pollfd _userfd[1];
+  int _fd;
+  std::string _hostname;
+  int _port;
   std::string _username;
-  int _ret;
+  std::string _nickname;
 
 public:
   // canonical form
-  User(Socket &sock);
+  User(int newSock, char host[NI_MAXHOST], char service[NI_MAXSERV]);
   ~User();
   User(const User &cpy);
   User &operator=(const User &e);
 
   // methodes
-  int init();
-  int acceptConnection(int socketServer);
+  // int init();
+  // int acceptConnection(int socketServer);
 
   // getters
-  int getSocketClient();
-  struct sockaddr_in getAddrClient();
-  socklen_t getAddrClientSize();
-  pollfd *getUserfd();
+  // int getSocketClient();
+  // struct sockaddr_in getAddrClient();
+  // socklen_t getAddrClientSize();
+  // pollfd *getUserfd();
 };
 
 #endif
