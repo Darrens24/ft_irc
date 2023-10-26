@@ -146,149 +146,129 @@ void Server::launchParser(char buffer[1024], int fd) {
   (void)fd;
   std::vector<std::string> array = mySplit(str, "\r\n\t\v ");
 
-  // check if the message is a command
   if (array[0] == "NICK") {
     if (array.size() == 2) {
-      this->changeNick(array[1], fd);
+      std::cout << "We change nick" << std::endl;
+      // this->changeNick(array[1], fd);
     } else {
       std::cout << "Usage : JOIN <channel>" << std::endl;
     }
   } else if (array[0] == "JOIN") {
     if (array.size() == 2) {
-      this->joinChannel(array[1], fd);
+      std::cout << "We change join" << std::endl;
+      // this->joinChannel(array[1], fd);
     } else {
       std::cout << "Usage : JOIN <channel>" << std::endl;
     }
-  } else if (array[0] == "/leave") {
-    if (array.size() == 2) {
-      this->leaveChannel(array[1], fd);
-    } else {
-      std::cout << RED "Wrong number of arguments" NC << std::endl;
-    }
-  } else if (array[0] == "/list") {
-    if (array.size() == 1) {
-      this->listChannels(fd);
-    } else {
-      std::cout << RED "Wrong number of arguments" NC << std::endl;
-    }
-  } else if (array[0] == "/users") {
-    if (array.size() == 1) {
-      this->listUsers(fd);
-    } else {
-      std::cout << RED "Wrong number of arguments" NC << std::endl;
-    }
-  } else if (array[0] == "/msg") {
-    if (array.size() >= 3) {
-      this->sendPrivateMessage(array[1], array[2], fd);
-    } else {
-      std::cout << RED "Wrong number
-    }
-    void Server::acceptNewClient() {
-      int fd = accept(this->_socket, (struct sockaddr *)&this->_address,
-                      (socklen_t *)&this->_addrLen);
-      if (fd < 0) {
-        std::cout << RED "Accept failed" NC << std::endl;
-        exit(EXIT_FAILURE);
-      }
-      std::cout << GRN "New client accepted" NC << std::endl;
-      pollfd newPoll;
-      newPoll.fd = fd;
-      newPoll.events = POLLIN;
-      newPoll.revents = 0;
-      this->_polls.push_back(newPoll);
+  }
+}
 
-      char hostName[NI_MAXHOST];
-      char hostService[NI_MAXSERV];
-      memset(hostName, 0, NI_MAXHOST);
-      memset(hostService, 0, NI_MAXSERV);
+void Server::acceptNewClient() {
+  int fd = accept(this->_socket, (struct sockaddr *)&this->_address,
+                  (socklen_t *)&this->_addrLen);
+  if (fd < 0) {
+    std::cout << RED "Accept failed" NC << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  std::cout << GRN "New client accepted" NC << std::endl;
+  pollfd newPoll;
+  newPoll.fd = fd;
+  newPoll.events = POLLIN;
+  newPoll.revents = 0;
+  this->_polls.push_back(newPoll);
 
-      int res = getnameinfo((struct sockaddr *)&this->_address, this->_addrLen,
-                            hostName, NI_MAXHOST, hostService, NI_MAXSERV, 0);
-      if (res) {
-        std::cout << RED "Getnameinfo failed" NC << std::endl;
-        exit(EXIT_FAILURE);
-      }
-      std::cout << GRN "New client connected on port " << hostService << NC
-                << std::endl;
+  char hostName[NI_MAXHOST];
+  char hostService[NI_MAXSERV];
+  memset(hostName, 0, NI_MAXHOST);
+  memset(hostService, 0, NI_MAXSERV);
 
-      this->initChecker(fd);
-      // User newUser(fd, hostName, hostService);
-      // this->_users.push_back(newUser);
-    }
+  int res = getnameinfo((struct sockaddr *)&this->_address, this->_addrLen,
+                        hostName, NI_MAXHOST, hostService, NI_MAXSERV, 0);
+  if (res) {
+    std::cout << RED "Getnameinfo failed" NC << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  std::cout << GRN "New client connected on port " << hostService << NC
+            << std::endl;
 
-    int Server::initChecker(int fd) {
-      char buffer[1000];
+  this->initChecker(fd);
+  // User newUser(fd, hostName, hostService);
+  // this->_users.push_back(newUser);
+}
 
-      for (int i = 0; i < 3; i++) {
-        send(fd, "Enter password : ", 17, 0);
-        ssize_t bytes_received = recv(fd, buffer, 1000, 0);
-        if (bytes_received < 0) {
-          std::cout << RED "Recv failed" NC << std::endl;
-          close(fd);
-          return -1;
-        }
+int Server::initChecker(int fd) {
+  char buffer[1000];
 
-        for (ssize_t i = 0; i < bytes_received; ++i) {
-          if (buffer[i] == '\n' || buffer[i] == '\r') {
-            buffer[i] = '\0';
-            break;
-          }
-        }
-
-        if (strcmp(buffer, this->_password.c_str()) == 0) {
-          std::cout << GRN "Password correct" NC << std::endl;
-          return 0;
-        } else {
-          std::cout << RED "Password incorrect" NC << std::endl;
-          send(fd, "Password incorrect.\n", 20, 0);
-          continue;
-        }
-      }
-      send(fd, "Too many tries. Disconnecting.\n", 31, 0);
+  for (int i = 0; i < 3; i++) {
+    send(fd, "Enter password : ", 17, 0);
+    ssize_t bytes_received = recv(fd, buffer, 1000, 0);
+    if (bytes_received < 0) {
+      std::cout << RED "Recv failed" NC << std::endl;
+      close(fd);
       return -1;
     }
-  // int Server::initChecker() {
-  //   char buffer[1000];
-  //   send(u.getSocketClient(), "Enter password.\n", 17, 0);
-  //   while (1) {
-  //     ssize_t bytes_received = recv(u.getSocketClient(), buffer, 1000, 0);
-  //     if (bytes_received < 0) {
-  //       std::cout << RED "Recv failed" NC << std::endl;
-  //       close(u.getSocketClient());
-  //       return -1;
-  //     }
-  //
-  //     for (ssize_t i = 0; i < bytes_received; ++i) {
-  //       if (buffer[i] == '\n' || buffer[i] == '\r') {
-  //         buffer[i] = '\0';
-  //         break;
-  //       }
-  //     }
-  //     std::cout << "Password received: " << buffer << std::endl;
-  //     std::cout << "Password expected: " << _password << std::endl;
-  //     if (!strcmp(buffer, _password.c_str())) {
-  //       send(u.getSocketClient(), "Password OK.\n", 13, 0);
-  //       return 1;
-  //     } else
-  //       send(u.getSocketClient(), "Wrong password.\n", 16, 0);
-  //   }
-  //   return 0;
-  // }
-  //
-  // int Server::createChannel(std::string channelName) {
-  //   Channel newChannel(channelName);
-  //   _channels.insert(std::make_pair(channelName, newChannel));
-  //   this->_channels.end()->second.addUser(_users.back());
-  //   return 0;
-  // }
-  //
-  // int Server::joinChannel(std::string channelName, User &u) {
-  //   std::map<std::string, Channel>::iterator it =
-  //   _channels.find(channelName); if (it != _channels.end()) {
-  //     it->second.addUser(u);
-  //     return (0);
-  //   } else {
-  //     // message erreur car pas de canal a ce nom
-  //     return (-1);
-  //   }
-  // }
+
+    for (ssize_t i = 0; i < bytes_received; ++i) {
+      if (buffer[i] == '\n' || buffer[i] == '\r') {
+        buffer[i] = '\0';
+        break;
+      }
+    }
+
+    if (strcmp(buffer, this->_password.c_str()) == 0) {
+      std::cout << GRN "Password correct" NC << std::endl;
+      return 0;
+    } else {
+      std::cout << RED "Password incorrect" NC << std::endl;
+      send(fd, "Password incorrect.\n", 20, 0);
+      continue;
+    }
+  }
+  send(fd, "Too many tries. Disconnecting.\n", 31, 0);
+  return -1;
+}
+// int Server::initChecker() {
+//   char buffer[1000];
+//   send(u.getSocketClient(), "Enter password.\n", 17, 0);
+//   while (1) {
+//     ssize_t bytes_received = recv(u.getSocketClient(), buffer, 1000, 0);
+//     if (bytes_received < 0) {
+//       std::cout << RED "Recv failed" NC << std::endl;
+//       close(u.getSocketClient());
+//       return -1;
+//     }
+//
+//     for (ssize_t i = 0; i < bytes_received; ++i) {
+//       if (buffer[i] == '\n' || buffer[i] == '\r') {
+//         buffer[i] = '\0';
+//         break;
+//       }
+//     }
+//     std::cout << "Password received: " << buffer << std::endl;
+//     std::cout << "Password expected: " << _password << std::endl;
+//     if (!strcmp(buffer, _password.c_str())) {
+//       send(u.getSocketClient(), "Password OK.\n", 13, 0);
+//       return 1;
+//     } else
+//       send(u.getSocketClient(), "Wrong password.\n", 16, 0);
+//   }
+//   return 0;
+// }
+//
+// int Server::createChannel(std::string channelName) {
+//   Channel newChannel(channelName);
+//   _channels.insert(std::make_pair(channelName, newChannel));
+//   this->_channels.end()->second.addUser(_users.back());
+//   return 0;
+// }
+//
+// int Server::joinChannel(std::string channelName, User &u) {
+//   std::map<std::string, Channel>::iterator it =
+//   _channels.find(channelName); if (it != _channels.end()) {
+//     it->second.addUser(u);
+//     return (0);
+//   } else {
+//     // message erreur car pas de canal a ce nom
+//     return (-1);
+//   }
+// }
