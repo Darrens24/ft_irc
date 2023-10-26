@@ -151,20 +151,12 @@ void Server::launchParser(char buffer[1024], int fd) {
   if (array.size() == 0) {
     return;
   }
-  if (array[0] == "NICK") {
-    if (array.size() == 2) {
-      std::cout << "We change nick" << std::endl;
-      // this->changeNick(array[1], fd);
-    } else {
-      std::cout << "Usage : Nick <channel>" << std::endl;
-    }
-  } else if (array[0] == "JOIN") {
-    if (array.size() == 2) {
-      std::cout << "We change join" << std::endl;
-      // this->joinChannel(array[1], fd);
-    } else {
-      std::cout << "Usage : JOIN <channel>" << std::endl;
-    }
+  if (this->_users.find(fd) != this->_users.end())
+    std::cout << "User found" << std::endl;
+
+  if (array[0] == "JOIN") {
+    Join join(this);
+    join.execute(this->_users[fd], array);
   }
 }
 
@@ -200,7 +192,11 @@ void Server::acceptNewClient() {
     close(fd);
   }
 
-  // askUserData(fd);
+  User *newUser;
+  newUser = new User(fd, hostName, hostService);
+  this->_users.insert(std::make_pair(fd, newUser));
+
+  askUserData(fd);
   // User newUser(fd, hostName, hostService);
   // this->_users.push_back(newUser);
 }
@@ -209,8 +205,7 @@ int Server::initChecker(int fd) {
   char buffer[1000];
 
   send(fd, "Enter password : ", 17, 0);
-  // ssize_t bytes_received = recv(fd, buffer, 1000, 0);
-  ssize_t bytes_received = read(fd, buffer, 1000);
+  ssize_t bytes_received = recv(fd, buffer, 1000, 0);
   if (bytes_received < 0) {
     std::cout << RED "Recv failed" NC << std::endl;
     close(fd);
@@ -233,3 +228,22 @@ int Server::initChecker(int fd) {
   }
   return -1;
 }
+
+int Server::createChannel(std::string channelName, User *u) {
+  Channel *newChannel = new Channel(channelName);
+  _channels.insert(std::make_pair(channelName, newChannel));
+  this->joinChannel(channelName, u);
+
+  return 0;
+}
+
+int Server::joinChannel(std::string channelName, User *u) {
+  std::map<std::string, Channel *>::iterator it = _channels.find(channelName);
+  if (it != _channels.end()) {
+    it->second->addUser(u);
+    return 0;
+  } else
+    return -1;
+}
+
+std::map<std::string, Channel *> &Server::getChannel() { return _channels; }

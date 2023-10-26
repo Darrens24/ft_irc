@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 12:44:53 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/25 15:10:44 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/26 15:56:20 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ public:
   // int acceptConnection(int socketServer);
 
   // getters
+  std::string getNickname() const { return _nickname; }
   // int getSocketClient();
   // struct sockaddr_in getAddrClient();
   // socklen_t getAddrClientSize();

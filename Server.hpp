@@ -13,6 +13,7 @@
 #pragma once
 
 #include "Channel.hpp"
+#include "Command.hpp"
 #include "Socket.hpp"
 #include "User.hpp"
 #include "colors.hpp"
@@ -43,9 +44,9 @@ private:
   int _maxClients;
   struct sockaddr_in _address;
   socklen_t _addrLen;
-  std::vector<User> _users;
+  std::map<int, User *> _users;
   std::vector<pollfd> _polls;
-  std::map<std::string, Channel> _channels;
+  std::map<std::string, Channel *> _channels;
 
 public:
   // canonical form
@@ -60,6 +61,8 @@ public:
   void readFromClient(int fd, int i);
   void launchParser(char buffer[1024], int fd);
   int initChecker(int fd);
-  int createChannel(std::string name);
-  int joinChannel(std::string name, User &u);
+
+  int createChannel(std::string name, User *u);
+  int joinChannel(std::string name, User *u);
+  std::map<std::string, Channel *> &getChannel();
 };

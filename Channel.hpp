@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 12:44:53 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/25 16:22:03 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/26 16:57:59 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@
 class Channel {
 private:
   std::string _channelName;
-  std::vector<User> _users;
+  std::vector<User *> _users;
+  User *_owner;
 
 public:
   // canonical form
@@ -39,5 +40,12 @@ public:
   Channel &operator=(const Channel &e);
 
   // methodes
-  int addUser(User &u);
+  int addUser(User *u);
+  int isInChannel(User *u);
+  // setters
+  void setOwner(User *u);
+
+  // getters
+  User *getOwner();
+  std::string getChannelName();
 };
