@@ -191,7 +191,9 @@ void Server::acceptNewClient() {
   std::cout << GRN "New client connected on port " << hostService << NC
             << std::endl;
 
-  this->initChecker(fd);
+  if (this->initChecker(fd) == -1) {
+    close(fd);
+  }
   // User newUser(fd, hostName, hostService);
   // this->_users.push_back(newUser);
 }
@@ -199,32 +201,28 @@ void Server::acceptNewClient() {
 int Server::initChecker(int fd) {
   char buffer[1000];
 
-  for (int i = 0; i < 3; i++) {
-    send(fd, "Enter password : ", 17, 0);
-    ssize_t bytes_received = recv(fd, buffer, 1000, 0);
-    if (bytes_received < 0) {
-      std::cout << RED "Recv failed" NC << std::endl;
-      close(fd);
-      return -1;
-    }
+  send(fd, "Enter password : ", 17, 0);
+  ssize_t bytes_received = recv(fd, buffer, 1000, 0);
+  if (bytes_received < 0) {
+    std::cout << RED "Recv failed" NC << std::endl;
+    close(fd);
+    return -1;
+  }
 
-    for (ssize_t i = 0; i < bytes_received; ++i) {
-      if (buffer[i] == '\n' || buffer[i] == '\r') {
-        buffer[i] = '\0';
-        break;
-      }
-    }
-
-    if (strcmp(buffer, this->_password.c_str()) == 0) {
-      std::cout << GRN "Password correct" NC << std::endl;
-      return 0;
-    } else {
-      std::cout << RED "Password incorrect" NC << std::endl;
-      send(fd, "Password incorrect.\n", 20, 0);
-      continue;
+  for (ssize_t i = 0; i < bytes_received; ++i) {
+    if (buffer[i] == '\n' || buffer[i] == '\r') {
+      buffer[i] = '\0';
+      break;
     }
   }
-  send(fd, "Too many tries. Disconnecting.\n", 31, 0);
+
+  if (strcmp(buffer, this->_password.c_str()) == 0) {
+    std::cout << GRN "Password correct" NC << std::endl;
+    return 0;
+  } else {
+    std::cout << RED "Password incorrect" NC << std::endl;
+    send(fd, "Password incorrect.\n", 20, 0);
+  }
   return -1;
 }
 // int Server::initChecker() {
