@@ -57,8 +57,9 @@ public:
   // methodes
   void start();
   void acceptNewClient();
-  void readFromClient(int fd);
-  int initChecker(User &u);
+  void readFromClient(int fd, int i);
+  void launchParser(char buffer[1024], int fd);
+  int initChecker(int fd);
   int createChannel(std::string name);
   int joinChannel(std::string name, User &u);
 };
