@@ -90,20 +90,31 @@ void Server::start() {
       exit(EXIT_FAILURE);
     }
 
-    for (long unsigned int i = 0; i < this->_polls.size(); i++) {
-      if (this->_polls[i].revents & POLLIN) {
-        if (this->_polls[i].fd == this->_socket) {
-          this->acceptNewClient();
-        }
-        // } else {
-        //   this->handleClient(this->_polls[i].fd);
-        // }
-      } else if (this->_polls[i].revents & POLLHUP) {
+    for (long unsigned int i = 0; i < this->_polls.size(); ++i) {
+      if (this->_polls[i].revents & POLLHUP) {
         std::cout << RED "Client disconnected" NC << std::endl;
         close(this->_polls[i].fd);
         this->_polls.erase(this->_polls.begin() + i);
       }
+      if (this->_polls[i].revents & POLLIN) {
+        if (this->_polls[i].fd == this->_socket) {
+          this->acceptNewClient();
+        } else {
+          this->readFromClient(this->_polls[i].fd);
+        }
+      }
     }
+  }
+}
+
+void Server::readFromClient(int fd) {
+  char buffer[1024];
+  memset(buffer, 0, 1024);
+
+  ssize_t read = recv(fd, buffer, 1024, 0);
+  if (read < 0) {
+    std::cout << RED "Recv failed" NC << std::endl;
+    exit(EXIT_FAILURE);
   }
 }
 
@@ -177,8 +188,8 @@ void Server::acceptNewClient() {
 // }
 //
 // int Server::joinChannel(std::string channelName, User &u) {
-//   std::map<std::string, Channel>::iterator it = _channels.find(channelName);
-//   if (it != _channels.end()) {
+//   std::map<std::string, Channel>::iterator it =
+//   _channels.find(channelName); if (it != _channels.end()) {
 //     it->second.addUser(u);
 //     return (0);
 //   } else {
