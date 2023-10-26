@@ -90,7 +90,7 @@ void Server::start() {
       exit(EXIT_FAILURE);
     }
 
-    for (long unsigned int i = 0; i < this->_polls.size(); ++i) {
+    for (long unsigned int i = 0; i < this->_polls.size(); i++) {
       if (this->_polls[i].revents & POLLHUP) {
         std::cout << RED "Client disconnected" NC << std::endl;
         close(this->_polls[i].fd);
@@ -116,6 +116,12 @@ void Server::readFromClient(int fd) {
     std::cout << RED "Recv failed" NC << std::endl;
     exit(EXIT_FAILURE);
   }
+  if (read == 0) {
+    std::cout << RED "Client disconnected" NC << std::endl;
+    close(fd);
+  }
+  std::cout << GRN "Message received" NC << std::endl;
+  std::cout << "Message is : " << buffer << std::endl;
 }
 
 void Server::acceptNewClient() {
