@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include <sys/types.h>
 
 std::vector<std::string> mySplit(std::string str, std::string sep) {
   char *cstr = const_cast<char *>(str.c_str());
@@ -89,7 +90,7 @@ Server &Server::operator=(const Server &e) {
 void Server::start() {
   pollfd serverPoll;
   serverPoll.fd = this->_socket;
-  serverPoll.events = POLLIN;
+  serverPoll.events = POLLIN | POLLHUP | POLLRDHUP;
   serverPoll.revents = 0;
 
   this->_polls.push_back(serverPoll);
@@ -102,17 +103,18 @@ void Server::start() {
       exit(EXIT_FAILURE);
     }
 
-    for (long unsigned int i = 0; i < this->_polls.size(); ++i) {
+    for (long unsigned int i = 0; i < this->_polls.size(); i++) {
       if (this->_polls[i].revents & POLLRDHUP) {
         std::cout << RED "Client disconnected" NC << std::endl;
         close(this->_polls[i].fd);
         this->_polls.erase(this->_polls.begin() + i);
+        break;
       }
       if (this->_polls[i].revents & POLLIN) {
         if (this->_polls[i].fd == this->_socket) {
           this->acceptNewClient();
           break;
-        } else {
+        } else if (this->_polls[i].fd) {
           this->readFromClient(this->_polls[i].fd, i);
           break;
         }
@@ -123,7 +125,7 @@ void Server::start() {
 
 void Server::readFromClient(int fd, int i) {
   char buffer[1024];
-  memset(buffer, 0, 1024);
+  // memset(buffer, 0, 1024);
 
   ssize_t read = recv(fd, buffer, 1024, 0);
   if (read < 0) {
@@ -134,11 +136,10 @@ void Server::readFromClient(int fd, int i) {
     std::cout << RED "Client disconnected (read)" NC << std::endl;
     close(this->_polls[i].fd);
     this->_polls.erase(this->_polls.begin() + i);
+    return;
   }
 
   launchParser(buffer, fd);
-  // std::cout << GRN "Message received" NC << std::endl;
-  // std::cout << "Message is : " << buffer << std::endl;
 }
 
 void Server::launchParser(char buffer[1024], int fd) {
@@ -146,12 +147,16 @@ void Server::launchParser(char buffer[1024], int fd) {
   (void)fd;
   std::vector<std::string> array = mySplit(str, "\r\n\t\v ");
 
+  // std::cout << "Message is : " << buffer << std::endl;
+  if (array.size() == 0) {
+    return;
+  }
   if (array[0] == "NICK") {
     if (array.size() == 2) {
       std::cout << "We change nick" << std::endl;
       // this->changeNick(array[1], fd);
     } else {
-      std::cout << "Usage : JOIN <channel>" << std::endl;
+      std::cout << "Usage : Nick <channel>" << std::endl;
     }
   } else if (array[0] == "JOIN") {
     if (array.size() == 2) {
@@ -173,7 +178,7 @@ void Server::acceptNewClient() {
   std::cout << GRN "New client accepted" NC << std::endl;
   pollfd newPoll;
   newPoll.fd = fd;
-  newPoll.events = POLLIN;
+  newPoll.events = POLLIN | POLLHUP | POLLRDHUP;
   newPoll.revents = 0;
   this->_polls.push_back(newPoll);
 
@@ -195,7 +200,7 @@ void Server::acceptNewClient() {
     close(fd);
   }
 
-  askUserData(fd);
+  // askUserData(fd);
   // User newUser(fd, hostName, hostService);
   // this->_users.push_back(newUser);
 }
@@ -204,7 +209,8 @@ int Server::initChecker(int fd) {
   char buffer[1000];
 
   send(fd, "Enter password : ", 17, 0);
-  ssize_t bytes_received = recv(fd, buffer, 1000, 0);
+  // ssize_t bytes_received = recv(fd, buffer, 1000, 0);
+  ssize_t bytes_received = read(fd, buffer, 1000);
   if (bytes_received < 0) {
     std::cout << RED "Recv failed" NC << std::endl;
     close(fd);
@@ -227,48 +233,3 @@ int Server::initChecker(int fd) {
   }
   return -1;
 }
-// int Server::initChecker() {
-//   char buffer[1000];
-//   send(u.getSocketClient(), "Enter password.\n", 17, 0);
-//   while (1) {
-//     ssize_t bytes_received = recv(u.getSocketClient(), buffer, 1000, 0);
-//     if (bytes_received < 0) {
-//       std::cout << RED "Recv failed" NC << std::endl;
-//       close(u.getSocketClient());
-//       return -1;
-//     }
-//
-//     for (ssize_t i = 0; i < bytes_received; ++i) {
-//       if (buffer[i] == '\n' || buffer[i] == '\r') {
-//         buffer[i] = '\0';
-//         break;
-//       }
-//     }
-//     std::cout << "Password received: " << buffer << std::endl;
-//     std::cout << "Password expected: " << _password << std::endl;
-//     if (!strcmp(buffer, _password.c_str())) {
-//       send(u.getSocketClient(), "Password OK.\n", 13, 0);
-//       return 1;
-//     } else
-//       send(u.getSocketClient(), "Wrong password.\n", 16, 0);
-//   }
-//   return 0;
-// }
-//
-// int Server::createChannel(std::string channelName) {
-//   Channel newChannel(channelName);
-//   _channels.insert(std::make_pair(channelName, newChannel));
-//   this->_channels.end()->second.addUser(_users.back());
-//   return 0;
-// }
-//
-// int Server::joinChannel(std::string channelName, User &u) {
-//   std::map<std::string, Channel>::iterator it =
-//   _channels.find(channelName); if (it != _channels.end()) {
-//     it->second.addUser(u);
-//     return (0);
-//   } else {
-//     // message erreur car pas de canal a ce nom
-//     return (-1);
-//   }
-// }
