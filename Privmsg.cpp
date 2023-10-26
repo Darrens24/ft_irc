@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/26 11:02:02 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/26 20:21:34 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/26 21:55:36 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,31 @@ Privmsg::~Privmsg() {}
 
 // syntax: Privmsg <target> [<keys>]
 
+void Privmsg::SendPrivateMessage(User *client, std::vector<std::string> args) {
+    //std::cout << "SendPrivateMessage" << std::endl;
+    std::vector<User *>allUsers = _srv->getUsersOnly();
+    for (std::vector<User *>::iterator it = allUsers.begin();
+                it != allUsers.end(); it++) {
+            if ((*it)->getNickname() == args[1]) {
+                send ((*it)->getFd(), "[", 1, 0);
+                send ((*it)->getFd(), client->getNickname().c_str(), client->getNickname().length(), 0);
+                send ((*it)->getFd(), "] ", 1, 0);
+                send((*it)->getFd(), args[2].c_str(), args[2].length(), 0);
+                send ((*it)->getFd(), "\n", 1, 0);
+            }
+            (void)client;
+        }
+    //gerer cas ou pas trouve username
+}
+
+
 void Privmsg::execute(User *client, std::vector<std::string> args) {
     if (args.size() < 3) {
         std::cout << "Not enough arguments" << std::endl;
         return;
     }
-    if (args[1][0] == '#') {
+    if (args[1][0] == '#') { //send to server
         args[1].erase(0, 1);
-        // check if channel exists
         for (std::map<std::string, Channel *>::iterator it =
                      _srv->getChannel().begin();
              it != _srv->getChannel().end(); it++) {
@@ -37,6 +54,7 @@ void Privmsg::execute(User *client, std::vector<std::string> args) {
                 for (std::vector<User *>::iterator iter = it->second->getUsersOfChannel().begin() 
                     ; iter !=  it->second->getUsersOfChannel().end() ; iter++) {
                         send((*iter)->getFd(), args[2].c_str(), args[2].length(), 0);
+                        send ((*iter)->getFd(), "\n", 1, 0);
                     }
                     
             }
@@ -46,7 +64,10 @@ void Privmsg::execute(User *client, std::vector<std::string> args) {
             }
             
         }
-
-        return;
+    
+    }
+    else 
+    {
+        SendPrivateMessage(client, args);
     }
 }

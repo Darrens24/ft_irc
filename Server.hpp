@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 12:44:53 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/26 19:38:26 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/26 21:37:23 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,4 +69,5 @@ public:
   int joinChannel(std::string name, User *u);
   std::string sendMsgToChannel(std::string target ,std::string msg, User *u);
   std::map<std::string, Channel *> &getChannel();
+  std::vector<User *> getUsersOnly();
 };

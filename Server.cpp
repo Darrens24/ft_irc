@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 14:57:54 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/26 20:12:23 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/26 21:37:05 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -328,3 +328,15 @@ int Server::joinChannel(std::string channelName, User *u) {
 std::string sendMsgToChannel(std::string target ,std::string msg, User *u);
 
 std::map<std::string, Channel *> &Server::getChannel() { return _channels; }
+
+std::vector<User *> Server::getUsersOnly()
+{
+    std::vector<User *> usersOnly;
+
+    for(std::map<int, User *>::iterator it = _users.begin(); it != _users.end(); ++it)
+    {
+        usersOnly.push_back(it->second);
+    }
+
+    return usersOnly;
+}
