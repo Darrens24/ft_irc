@@ -194,6 +194,8 @@ void Server::acceptNewClient() {
   if (this->initChecker(fd) == -1) {
     close(fd);
   }
+
+  askUserData(fd);
   // User newUser(fd, hostName, hostService);
   // this->_users.push_back(newUser);
 }
