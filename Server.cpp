@@ -201,6 +201,51 @@ void Server::acceptNewClient() {
   // this->_users.push_back(newUser);
 }
 
+void Server::askUserData(int fd) {
+  send(fd, "Enter your nickname : ", 22, 0);
+  char buffer[1000];
+  ssize_t bytes_received = recv(fd, buffer, 1000, 0);
+  if (bytes_received < 0) {
+    std::cout << RED "Recv failed" NC << std::endl;
+    close(fd);
+    return;
+  }
+
+  for (ssize_t i = 0; i < bytes_received; ++i) {
+    if (buffer[i] == '\n' || buffer[i] == '\r') {
+      buffer[i] = '\0';
+      break;
+    }
+  }
+
+  this->_users[fd]->setNickname(buffer);
+  std::cout << GRN "Nickname set to " << buffer << NC << std::endl;
+  send(fd, "Enter your username : ", 22, 0);
+  bytes_received = recv(fd, buffer, 1000, 0);
+  if (bytes_received < 0) {
+    std::cout << RED "Recv failed" NC << std::endl;
+    close(fd);
+    return;
+  }
+
+  for (ssize_t i = 0; i < bytes_received; ++i) {
+    if (buffer[i] == '\n' || buffer[i] == '\r') {
+      buffer[i] = '\0';
+      break;
+    }
+  }
+
+  this->_users[fd]->setUsername(buffer);
+  std::cout << GRN "Username set to " << buffer << NC << std::endl;
+  // send(fd, "Enter your realname : ", 22, 0);
+  // bytes_received = recv(fd, buffer, 1000, 0);
+  // if (bytes_received < 0) {
+  //   std::cout << RED "Recv failed" NC << std::endl;
+  //   close(fd);
+  //   return;
+  // }
+}
+
 int Server::initChecker(int fd) {
   char buffer[1000];
 

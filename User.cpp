@@ -41,6 +41,10 @@ User &User::operator=(const User &e) {
   return *this;
 }
 
+void User::setNickname(std::string nickname) { _nickname = nickname; }
+
+void User::setUsername(std::string username) { _username = username; }
+
 // int User::init() {
 //   _username = "";
 //   char buffer[1024] = {0};

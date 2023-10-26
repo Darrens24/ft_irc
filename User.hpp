@@ -45,6 +45,10 @@ public:
   // int init();
   // int acceptConnection(int socketServer);
 
+  // setters
+  void setNickname(std::string nickname);
+  void setUsername(std::string username);
+
   // getters
   std::string getNickname() const { return _nickname; }
   // int getSocketClient();

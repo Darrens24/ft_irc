@@ -60,7 +60,9 @@ public:
   void acceptNewClient();
   void readFromClient(int fd, int i);
   void launchParser(char buffer[1024], int fd);
+
   int initChecker(int fd);
+  void askUserData(int fd);
 
   int createChannel(std::string name, User *u);
   int joinChannel(std::string name, User *u);
