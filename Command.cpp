@@ -21,7 +21,7 @@
   RED "<" + client1 + "> " WHT ":You may not reregister(462)" NC
 
 #define ERR_PASSWDISMATCH(client1)                                             \
-  RED "<" + client1 + "> " WHT ":Password incorrect (464)" NC
+  "464 " + client1 + WHT " :Password incorrect (464)" NC
 
 #define ERR_NONICKNAMEGIVEN(client1)                                           \
   RED "<" + client1 + "> " WHT ":No nickname given (431)" NC

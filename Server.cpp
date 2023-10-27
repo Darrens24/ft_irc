@@ -143,14 +143,14 @@ void Server::readFromClient(int fd, int i) {
     this->_polls.erase(this->_polls.begin() + i);
     return;
   }
-  // if (this->_users[fd]->getUserRegistered() == false)
-  //   getBasicInfo(fd, buffer);
+  if (this->_users[fd]->getUserRegistered() == false)
+    getBasicInfo(fd, buffer);
   // else {
   //   this->_users[fd]->response(
   //       "001 dan :Welcome to the Internet Relay Network dan");
   // }
-  this->_users[fd]->response(
-      "CAP * LS :account-notify extended-join multi-prefix sasl");
+  // this->_users[fd]->response(
+  //     "CAP * LS :account-notify extended-join multi-prefix sasl");
 }
 //
 bool Server::getBasicInfo(int fd, char buffer[1024]) {
@@ -201,6 +201,9 @@ bool Server::getBasicInfo(int fd, char buffer[1024]) {
       this->_users[fd]->getUserRegistered() == true &&
       this->_users[fd]->getRegistered() == true) {
     this->_users[fd]->response("CAP * LS :multi-prefix sasl");
+    std::string welcomeMssg = "001 " + this->_users[fd]->getNickname() +
+                              " :Welcome to the Internet Relay Network bitch";
+    this->_users[fd]->response(welcomeMssg);
   }
   return true;
 }
