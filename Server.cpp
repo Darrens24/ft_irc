@@ -149,8 +149,10 @@ void Server::readFromClient(int fd, int i) {
   //   this->_users[fd]->response(
   //       "001 dan :Welcome to the Internet Relay Network dan");
   // }
+  this->_users[fd]->response(
+      "CAP * LS :account-notify extended-join multi-prefix sasl");
 }
-
+//
 bool Server::getBasicInfo(int fd, char buffer[1024]) {
 
   std::string str(buffer);
