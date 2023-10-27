@@ -6,11 +6,12 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 13:00:52 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/26 15:54:33 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/27 16:03:47 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "User.hpp"
+#include "Server.hpp"
 
 int myAtoi(char *str) {
   int res = 0;
@@ -48,6 +49,10 @@ void User::setNickname(std::string nickname) { _nickname = nickname; }
 void User::setUsername(std::string username) { _username = username; }
 
 void User::setRealName(std::string realname) { _realname = realname; }
+
+void User::setChannelInvited(Channel *channel) {
+  _channelsInvited.push_back(channel);
+}
 
 void User::response(const std::string &response) {
   std::string tmp = response + "\r\n";

@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 12:44:53 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/26 15:56:20 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/27 16:08:56 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
+class Channel;
 
 class User {
 private:
@@ -37,6 +38,7 @@ private:
   std::string _password;
   bool _registered;
   bool _userRegistered;
+  std::vector<Channel *> _channelsInvited;
 
 public:
   // canonical form
@@ -59,6 +61,7 @@ public:
   void setRealName(std::string realname);
   void setRegistered() { _registered = true; }
   void setUserRegistered() { _userRegistered = true; }
+  void setChannelInvited(Channel *channel);
 
   // getters
   std::string getNickname() const { return _nickname; }
@@ -67,6 +70,9 @@ public:
   bool getUserRegistered() const { return _userRegistered; }
   std::string getPasswd() const { return _password; }
   std::string getHostname() const { return _hostname; }
+  int getPort() { return _port; }
+  int getFd() { return _fd; }
+  std::vector<Channel *> &getChannelsInvited() { return _channelsInvited; }
 };
 
 #endif

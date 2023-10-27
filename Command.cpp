@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/26 10:43:37 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/26 15:43:09 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/27 16:29:03 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,4 +129,13 @@ bool Usercmd::execute(User *client, std::vector<std::string> args) {
       GRN "<" + client->getUsername() + "> " W ":User has been set" NC;
   client->response(login);
   return true;
+}
+
+std::string Command::trim(const std::string &str) {
+  size_t first = str.find_first_not_of(' ');
+  if (std::string::npos == first) {
+    return str;
+  }
+  size_t last = str.find_last_not_of(' ');
+  return str.substr(first, (last - first + 1));
 }

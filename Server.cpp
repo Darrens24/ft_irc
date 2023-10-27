@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 14:57:54 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/25 15:35:26 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/27 16:49:54 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ Server::Server(int port, std::string password)
 
   this->_address.sin_family = AF_INET;
   this->_address.sin_addr.s_addr = INADDR_ANY;
-  this->_address.sin_port = htons(port);
+  this->_address.sin_port = htons(this->_port);
   this->_addrLen = sizeof(this->_address);
 
   if (bind(this->_socket, (struct sockaddr *)&this->_address,
@@ -92,7 +92,6 @@ void Server::start() {
   pollfd serverPoll;
   serverPoll.fd = this->_socket;
   serverPoll.events = POLLIN | POLLHUP | POLLRDHUP;
-  // serverPoll.revents = 0;
   serverPoll.revents = 0;
 
   this->_polls.push_back(serverPoll);
@@ -146,14 +145,8 @@ void Server::readFromClient(int fd, int i) {
   }
   if (this->_users[fd]->getUserRegistered() == false)
     getBasicInfo(fd, buffer);
-  // else {
-  //   this->_users[fd]->response(
-  //       "001 dan :Welcome to the Internet Relay Network dan");
-  // }
-  // this->_users[fd]->response(
-  //     "CAP * LS :account-notify extended-join multi-prefix sasl");
 }
-//
+
 bool Server::getBasicInfo(int fd, char buffer[1024]) {
 
   std::string str(buffer);
@@ -229,29 +222,34 @@ std::vector<User *> Server::getUsersOnly() {
   return usersOnly;
 }
 
-// void Server::launchParser(char buffer[1024], int fd) {
-//   std::string str(buffer);
-//   (void)fd;
-//   std::vector<std::string> array = mySplit(str, "\r\n\t\v ");
-//
-//   std::cout << "Message is : " << buffer << std::endl;
-//   if (array.size() == 0) {
-//     return;
-//   }
-// if (this->_users.find(fd) != this->_users.end())
-//   std::cout << "User found" << std::endl;
-// std::cout << "Message is : " << buffer << std::endl;
-// if (array.size() == 0) {
-//   return;
-// }
-// if (this->_users.find(fd) != this->_users.end())
-//   std::cout << "User found" << std::endl;
+void Server::launchParser(char buffer[1024], int fd) {
+  std::string str(buffer);
+  (void)fd;
+  std::vector<std::string> array = mySplit(str, "\r\n\t\v ");
 
-// if (array[0] == "JOIN") {
-//   Join join(this);
-//   join.execute(this->_users[fd], array);
-// }
-// }
+  if (array[0] == "JOIN") {
+    Join join(this);
+    join.execute(this->_users[fd], array);
+    if (this->_users.find(fd) != this->_users.end())
+      std::cout << "User found" << std::endl;
+    if (array[0] == "JOIN") {
+      Join join(this);
+      join.execute(this->_users[fd], array);
+    }
+    if (array[0] == "PRIVMSG") {
+      Privmsg privmsg(this);
+      privmsg.execute(this->_users[fd], array);
+    }
+    if (array[0] == "KICK") {
+      Kick kick(this);
+      kick.execute(this->_users[fd], array);
+    }
+    if (array[0] == "INVITE") {
+      Invite invite(this);
+      invite.execute(this->_users[fd], array);
+    }
+  }
+}
 
 void Server::acceptNewClient() {
   int fd = accept(this->_socket, (struct sockaddr *)&this->_address,
@@ -264,7 +262,7 @@ void Server::acceptNewClient() {
             << std::endl;
   pollfd newPoll;
   newPoll.fd = fd;
-  newPoll.events = POLLIN | POLLHUP | POLLRDHUP;
+  newPoll.events = POLLIN | POLLHUP | POLLHUP;
   newPoll.revents = 0;
   this->_polls.push_back(newPoll);
 
@@ -281,15 +279,6 @@ void Server::acceptNewClient() {
   }
   std::cout << GRN CLIENTSPEAK " " << fd << W ": New client connected on port "
             << hostService << NC << std::endl;
-  // char buffer[1024];
-  // memset(buffer, 0, 1024);
-  // ssize_t bytes_received = recv(fd, buffer, 1024, 0);
-  // if (bytes_received < 0) {
-  //   std::cout << RED "Recv failed" NC << std::endl;
-  //   close(fd);
-  //   return;
-  // }
-  // std::cout << "Message is : " << buffer << std::endl;
 
   User *newUser;
   newUser = new User(fd, hostName, hostService, this->_password);
@@ -313,4 +302,25 @@ int Server::joinChannel(std::string channelName, User *u) {
     return -1;
 }
 
+std::string sendMsgToChannel(std::string target, std::string msg, User *u);
+
 std::map<std::string, Channel *> &Server::getChannel() { return _channels; }
+
+Channel *Server::getChannelByName(std::string name) {
+  std::cout << name << std::endl;
+  if (_channels[name] != NULL) {
+    return _channels[name];
+  } else {
+    return NULL;
+  }
+}
+
+User *Server::getUserByNickname(std::string nickname) {
+  for (std::map<int, User *>::iterator it = _users.begin(); it != _users.end();
+       ++it) {
+    if (it->second->getNickname() == nickname) {
+      return it->second;
+    }
+  }
+  return NULL;
+}
