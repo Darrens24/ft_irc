@@ -91,7 +91,7 @@ void Server::start() {
   pollfd serverPoll;
   serverPoll.fd = this->_socket;
   serverPoll.events = POLLIN | POLLHUP | POLLRDHUP;
-  serverPoll.revents = 0;
+  // serverPoll.revents = 0;
 
   this->_polls.push_back(serverPoll);
   std::cout << GRN "Poll server created" NC << std::endl;
@@ -125,7 +125,7 @@ void Server::start() {
 
 void Server::readFromClient(int fd, int i) {
   char buffer[1024];
-  // memset(buffer, 0, 1024);
+  memset(buffer, 0, 1024);
 
   ssize_t read = recv(fd, buffer, 1024, 0);
   if (read < 0) {
@@ -139,7 +139,27 @@ void Server::readFromClient(int fd, int i) {
     return;
   }
 
-  launchParser(buffer, fd);
+  if (getBasicInfo(fd, buffer) == true) {
+    launchParser(buffer, fd);
+  }
+}
+
+bool Server::getBasicInfo(int fd, char buffer[1024]) {
+
+  std::string str(buffer);
+  std::vector<std::string> array = mySplit(str, "\r\n\t\v");
+  (void)fd;
+
+  if (array.size() == 0) {
+    return false;
+  }
+  if (array[0] == "CAP LS") {
+    array.erase(array.begin());
+    for (long unsigned int i = 0; i < array.size(); i++) {
+      std::cout << array[i] << std::endl;
+    }
+  }
+  return true;
 }
 
 void Server::launchParser(char buffer[1024], int fd) {
@@ -147,12 +167,12 @@ void Server::launchParser(char buffer[1024], int fd) {
   (void)fd;
   std::vector<std::string> array = mySplit(str, "\r\n\t\v ");
 
-  // std::cout << "Message is : " << buffer << std::endl;
+  std::cout << "Message is : " << buffer << std::endl;
   if (array.size() == 0) {
     return;
   }
-  if (this->_users.find(fd) != this->_users.end())
-    std::cout << "User found" << std::endl;
+  // if (this->_users.find(fd) != this->_users.end())
+  //   std::cout << "User found" << std::endl;
 
   if (array[0] == "JOIN") {
     Join join(this);
@@ -188,15 +208,22 @@ void Server::acceptNewClient() {
   std::cout << GRN "New client connected on port " << hostService << NC
             << std::endl;
 
-  if (this->initChecker(fd) == -1) {
-    close(fd);
-  }
+  // char buffer[1024];
+  // memset(buffer, 0, 1024);
+  // ssize_t bytes_received = recv(fd, buffer, 1024, 0);
+  // if (bytes_received < 0) {
+  //   std::cout << RED "Recv failed" NC << std::endl;
+  //   close(fd);
+  //   return;
+  // }
+  // std::cout << "Message is : " << buffer << std::endl;
+  // send(fd, ":ft_irc CAP * LS :multi-prefix\r\n", 32, 0);
 
-  User *newUser;
-  newUser = new User(fd, hostName, hostService);
-  this->_users.insert(std::make_pair(fd, newUser));
+  // User *newUser;
+  // newUser = new User(fd, hostName, hostService);
+  // this->_users.insert(std::make_pair(fd, newUser));
 
-  askUserData(fd);
+  // askUserData(fd);
   // User newUser(fd, hostName, hostService);
   // this->_users.push_back(newUser);
 }
@@ -237,13 +264,6 @@ void Server::askUserData(int fd) {
 
   this->_users[fd]->setUsername(buffer);
   std::cout << GRN "Username set to " << buffer << NC << std::endl;
-  // send(fd, "Enter your realname : ", 22, 0);
-  // bytes_received = recv(fd, buffer, 1000, 0);
-  // if (bytes_received < 0) {
-  //   std::cout << RED "Recv failed" NC << std::endl;
-  //   close(fd);
-  //   return;
-  // }
 }
 
 int Server::initChecker(int fd) {

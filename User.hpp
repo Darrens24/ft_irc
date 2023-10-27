@@ -33,6 +33,7 @@ private:
   int _port;
   std::string _username;
   std::string _nickname;
+  std::string _password;
 
 public:
   // canonical form
