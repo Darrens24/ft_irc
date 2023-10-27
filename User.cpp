@@ -29,7 +29,7 @@ int myAtoi(char *str) {
 User::User(int newSock, char host[NI_MAXHOST], char service[NI_MAXSERV],
            std::string srvpasswd)
     : _fd(newSock), _hostname(host), _port(myAtoi(service)),
-      _password(srvpasswd), _registered(false) {
+      _password(srvpasswd), _registered(false), _userRegistered(false) {
   _username = "";
   _nickname = "";
 }
@@ -46,6 +46,8 @@ User &User::operator=(const User &e) {
 void User::setNickname(std::string nickname) { _nickname = nickname; }
 
 void User::setUsername(std::string username) { _username = username; }
+
+void User::setRealName(std::string realname) { _realname = realname; }
 
 void User::response(const std::string &response) {
   std::string tmp = response + "\r\n";

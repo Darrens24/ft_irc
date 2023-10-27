@@ -31,13 +31,13 @@ public:
 //   void execute(User *client, std::vector<std::string> args);
 // };
 //
-// class Usercmd : public Command {
-// public:
-//   Usercmd(Server *srv);
-//   ~Usercmd();
-//
-//   void execute(User *client, std::vector<std::string> args);
-// };
+class Usercmd : public Command {
+public:
+  Usercmd(Server *srv);
+  ~Usercmd();
+
+  bool execute(User *client, std::vector<std::string> args);
+};
 
 class Nick : public Command {
 public:

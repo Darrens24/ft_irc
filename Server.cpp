@@ -132,6 +132,7 @@ void Server::readFromClient(int fd, int i) {
   // memset(buffer, 0, 1024);
 
   ssize_t read = recv(fd, buffer, 1024, 0);
+  std::cout << "Message received : " << buffer << std::endl;
   if (read < 0) {
     std::cout << RED "Recv failed" NC << std::endl;
     exit(EXIT_FAILURE);
@@ -142,10 +143,12 @@ void Server::readFromClient(int fd, int i) {
     this->_polls.erase(this->_polls.begin() + i);
     return;
   }
-
-  if (getBasicInfo(fd, buffer) == true) {
-    launchParser(buffer, fd);
-  }
+  // if (this->_users[fd]->getUserRegistered() == false)
+  //   getBasicInfo(fd, buffer);
+  // else {
+  //   this->_users[fd]->response(
+  //       "001 dan :Welcome to the Internet Relay Network dan");
+  // }
 }
 
 bool Server::getBasicInfo(int fd, char buffer[1024]) {
@@ -159,40 +162,45 @@ bool Server::getBasicInfo(int fd, char buffer[1024]) {
   if (array[0] == "CAP") {
     array.erase(array.begin());
     array.erase(array.begin());
-    for (long unsigned int i = 0; i < array.size(); i++) {
-      std::cout << array[i] << std::endl;
-    }
   }
   if (array[0] == "PASS") {
     Pass pass(this);
     if (!pass.execute(this->_users[fd], array)) {
       return false;
-      array.erase(array.begin());
-      array.erase(array.begin());
     }
+    array.erase(array.begin());
+    array.erase(array.begin());
   }
   if (array[0] == "NICK") {
     if (this->_users[fd]->getRegistered() == true) {
       Nick nick(this);
       if (!nick.execute(this->_users[fd], array)) {
         return false;
-        array.erase(array.begin());
-        array.erase(array.begin());
       }
+      array.erase(array.begin());
+      array.erase(array.begin());
     } else {
       this->_users[fd]->response(RED "You need to set password first" NC);
     }
   }
-  // if (array[0] == "USER") {
-  //   User user(this);
-  //   if (!user.execute(this->_users[fd], array)) {
-  //     return false;
-  //     array.erase(array.begin());
-  //     array.erase(array.begin());
-  //   }
-  // }
+  if (array[0] == "USER") {
+    if (this->_users[fd]->getRegistered() == true) {
+      Usercmd user(this);
+      if (!user.execute(this->_users[fd], array)) {
+        return false;
+      }
+      array.erase(array.begin());
+      array.erase(array.begin());
+    } else {
+      this->_users[fd]->response(RED "You need to set password first" NC);
+    }
+  }
+  if (!this->_users[fd]->getNickname().empty() &&
+      this->_users[fd]->getUserRegistered() == true &&
+      this->_users[fd]->getRegistered() == true) {
+    this->_users[fd]->response("CAP * LS :multi-prefix sasl");
+  }
   return true;
-  // launchParser(buffer, fd);
 }
 
 bool Server::isNicknameAvailable(std::string username) {
@@ -215,29 +223,29 @@ std::vector<User *> Server::getUsersOnly() {
   return usersOnly;
 }
 
-void Server::launchParser(char buffer[1024], int fd) {
-  std::string str(buffer);
-  (void)fd;
-  std::vector<std::string> array = mySplit(str, "\r\n\t\v ");
+// void Server::launchParser(char buffer[1024], int fd) {
+//   std::string str(buffer);
+//   (void)fd;
+//   std::vector<std::string> array = mySplit(str, "\r\n\t\v ");
+//
+//   std::cout << "Message is : " << buffer << std::endl;
+//   if (array.size() == 0) {
+//     return;
+//   }
+// if (this->_users.find(fd) != this->_users.end())
+//   std::cout << "User found" << std::endl;
+// std::cout << "Message is : " << buffer << std::endl;
+// if (array.size() == 0) {
+//   return;
+// }
+// if (this->_users.find(fd) != this->_users.end())
+//   std::cout << "User found" << std::endl;
 
-  std::cout << "Message is : " << buffer << std::endl;
-  if (array.size() == 0) {
-    return;
-  }
-  // if (this->_users.find(fd) != this->_users.end())
-  //   std::cout << "User found" << std::endl;
-  // std::cout << "Message is : " << buffer << std::endl;
-  if (array.size() == 0) {
-    return;
-  }
-  // if (this->_users.find(fd) != this->_users.end())
-  //   std::cout << "User found" << std::endl;
-
-  // if (array[0] == "JOIN") {
-  //   Join join(this);
-  //   join.execute(this->_users[fd], array);
-  // }
-}
+// if (array[0] == "JOIN") {
+//   Join join(this);
+//   join.execute(this->_users[fd], array);
+// }
+// }
 
 void Server::acceptNewClient() {
   int fd = accept(this->_socket, (struct sockaddr *)&this->_address,
@@ -275,7 +283,6 @@ void Server::acceptNewClient() {
   //   return;
   // }
   // std::cout << "Message is : " << buffer << std::endl;
-  // send(fd, ":ft_irc CAP * LS :multi-prefix\r\n", 32, 0);
 
   User *newUser;
   newUser = new User(fd, hostName, hostService, this->_password);

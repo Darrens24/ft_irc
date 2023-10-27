@@ -33,8 +33,10 @@ private:
   int _port;
   std::string _username;
   std::string _nickname;
+  std::string _realname;
   std::string _password;
   bool _registered;
+  bool _userRegistered;
 
 public:
   // canonical form
@@ -49,24 +51,21 @@ public:
   User &operator=(const User &e);
 
   // methodes
-  // int init();
-  // int acceptConnection(int socketServer);
   void response(const std::string &response);
 
   // setters
   void setNickname(std::string nickname);
   void setUsername(std::string username);
+  void setRealName(std::string realname);
   void setRegistered() { _registered = true; }
+  void setUserRegistered() { _userRegistered = true; }
 
   // getters
   std::string getNickname() const { return _nickname; }
   bool getRegistered() const { return _registered; }
+  bool getUserRegistered() const { return _userRegistered; }
   std::string getPasswd() const { return _password; }
   std::string getHostname() const { return _hostname; }
-  // int getSocketClient();
-  // struct sockaddr_in getAddrClient();
-  // socklen_t getAddrClientSize();
-  // pollfd *getUserfd();
 };
 
 #endif

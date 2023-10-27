@@ -102,18 +102,30 @@ bool Nick::execute(User *client, std::vector<std::string> args) {
   return true;
 }
 
-// /*
-//  *            USER COMMAND
-//  * */
+/*
+ *            USER COMMAND
+ * */
 
-// Usercmd::Usercmd(Server *srv) : Command(srv) {}
-//
-// Usercmd::~Usercmd(){};
-//
-// void Usercmd::execute(User *client, std::vector<std::string> args) {
-//   std::string login = "<" + client->getHostname() +
-//                       "> : Login succesful, please now enter your username
-//                       and " "nickname with USER [Username] and NICK
-//                       [Nickname]";
-//   client->response(login);
-// }
+Usercmd::Usercmd(Server *srv) : Command(srv) {}
+
+Usercmd::~Usercmd(){};
+
+bool Usercmd::execute(User *client, std::vector<std::string> args) {
+  if (args.size() < 5) {
+    client->response(ERR_NEEDMOREPARAMS(client->getHostname(), "USER"));
+    return false;
+  }
+
+  if (client->getUserRegistered()) {
+    client->response(ERR_ALREADYREGISTERED(client->getHostname()));
+    return false;
+  }
+
+  std::string login =
+      GRN "<" + client->getHostname() + "> " W ":User has been set" NC;
+  client->setUsername(args[1]);
+  client->setRealName(args[4]);
+  client->setUserRegistered();
+  client->response(login);
+  return true;
+}
