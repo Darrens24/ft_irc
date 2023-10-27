@@ -58,7 +58,10 @@ public:
   // methodes
   void start();
   void acceptNewClient();
+<<<<<<< HEAD
   bool getBasicInfo(int fd, char buffer[1024]);
+=======
+>>>>>>> pedro
   void readFromClient(int fd, int i);
   void launchParser(char buffer[1024], int fd);
 

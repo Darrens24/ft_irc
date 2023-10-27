@@ -17,6 +17,7 @@
 #define MAG "\033[1;35m"
 #define CYA "\033[1;36m"
 #define W "\033[1;97m"
+#define WHT "\033[1;97m"
 #define NC "\033[1;0m"
 #define I "\033[1;3m"
 #define U "\033[1;4m"

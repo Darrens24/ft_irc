@@ -34,10 +34,16 @@ private:
   std::string _username;
   std::string _nickname;
   std::string _password;
+  bool _registered;
 
 public:
   // canonical form
   User(int newSock, char host[NI_MAXHOST], char service[NI_MAXSERV]);
+
+public:
+  // canonical form
+  User(int newSock, char host[NI_MAXHOST], char service[NI_MAXSERV],
+       std::string srvpasswd);
   ~User();
   User(const User &cpy);
   User &operator=(const User &e);
@@ -45,6 +51,7 @@ public:
   // methodes
   // int init();
   // int acceptConnection(int socketServer);
+  void response(const std::string &response);
 
   // setters
   void setNickname(std::string nickname);
@@ -52,6 +59,9 @@ public:
 
   // getters
   std::string getNickname() const { return _nickname; }
+  bool getRegistered() const { return _registered; }
+  std::string getPasswd() const { return _password; }
+  std::string getHostname() const { return _hostname; }
   // int getSocketClient();
   // struct sockaddr_in getAddrClient();
   // socklen_t getAddrClientSize();

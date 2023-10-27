@@ -91,7 +91,11 @@ void Server::start() {
   pollfd serverPoll;
   serverPoll.fd = this->_socket;
   serverPoll.events = POLLIN | POLLHUP | POLLRDHUP;
+<<<<<<< HEAD
   // serverPoll.revents = 0;
+=======
+  serverPoll.revents = 0;
+>>>>>>> pedro
 
   this->_polls.push_back(serverPoll);
   std::cout << GRN "Poll server created" NC << std::endl;
@@ -125,7 +129,11 @@ void Server::start() {
 
 void Server::readFromClient(int fd, int i) {
   char buffer[1024];
+<<<<<<< HEAD
   memset(buffer, 0, 1024);
+=======
+  // memset(buffer, 0, 1024);
+>>>>>>> pedro
 
   ssize_t read = recv(fd, buffer, 1024, 0);
   if (read < 0) {
@@ -139,6 +147,7 @@ void Server::readFromClient(int fd, int i) {
     return;
   }
 
+<<<<<<< HEAD
   if (getBasicInfo(fd, buffer) == true) {
     launchParser(buffer, fd);
   }
@@ -160,6 +169,9 @@ bool Server::getBasicInfo(int fd, char buffer[1024]) {
     }
   }
   return true;
+=======
+  launchParser(buffer, fd);
+>>>>>>> pedro
 }
 
 void Server::launchParser(char buffer[1024], int fd) {
@@ -167,12 +179,21 @@ void Server::launchParser(char buffer[1024], int fd) {
   (void)fd;
   std::vector<std::string> array = mySplit(str, "\r\n\t\v ");
 
+<<<<<<< HEAD
   std::cout << "Message is : " << buffer << std::endl;
   if (array.size() == 0) {
     return;
   }
   // if (this->_users.find(fd) != this->_users.end())
   //   std::cout << "User found" << std::endl;
+=======
+  // std::cout << "Message is : " << buffer << std::endl;
+  if (array.size() == 0) {
+    return;
+  }
+  if (this->_users.find(fd) != this->_users.end())
+    std::cout << "User found" << std::endl;
+>>>>>>> pedro
 
   if (array[0] == "JOIN") {
     Join join(this);
@@ -208,6 +229,7 @@ void Server::acceptNewClient() {
   std::cout << GRN "New client connected on port " << hostService << NC
             << std::endl;
 
+<<<<<<< HEAD
   // char buffer[1024];
   // memset(buffer, 0, 1024);
   // ssize_t bytes_received = recv(fd, buffer, 1024, 0);
@@ -222,6 +244,15 @@ void Server::acceptNewClient() {
   // User *newUser;
   // newUser = new User(fd, hostName, hostService);
   // this->_users.insert(std::make_pair(fd, newUser));
+=======
+  // if (this->initChecker(fd) == -1) {
+  //   close(fd);
+  // }
+
+  User *newUser;
+  newUser = new User(fd, hostName, hostService, this->_password);
+  this->_users.insert(std::make_pair(fd, newUser));
+>>>>>>> pedro
 
   // askUserData(fd);
   // User newUser(fd, hostName, hostService);
@@ -264,6 +295,16 @@ void Server::askUserData(int fd) {
 
   this->_users[fd]->setUsername(buffer);
   std::cout << GRN "Username set to " << buffer << NC << std::endl;
+<<<<<<< HEAD
+=======
+  // send(fd, "Enter your realname : ", 22, 0);
+  // bytes_received = recv(fd, buffer, 1000, 0);
+  // if (bytes_received < 0) {
+  //   std::cout << RED "Recv failed" NC << std::endl;
+  //   close(fd);
+  //   return;
+  // }
+>>>>>>> pedro
 }
 
 int Server::initChecker(int fd) {

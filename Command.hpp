@@ -30,3 +30,30 @@ public:
 
   void execute(User *client, std::vector<std::string> args);
 };
+<<<<<<< HEAD
+=======
+
+class Usercmd : public Command {
+public:
+  Usercmd(Server *srv);
+  ~Usercmd();
+
+  void execute(User *client, std::vector<std::string> args);
+};
+
+class Nick : public Command {
+public:
+  Nick(Server *srv);
+  ~Nick();
+
+  void execute(User *client, std::vector<std::string> args);
+};
+
+class Pass : public Command {
+public:
+  Pass(Server *srv);
+  ~Pass();
+
+  void execute(User *client, std::vector<std::string> args);
+};
+>>>>>>> pedro
