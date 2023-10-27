@@ -22,10 +22,13 @@
 
 using namespace std;
 
-Socket::Socket(const std::string &pass)
-    : serverSocket(-1), clientSocket(-1), port(-1), password(pass) {}
+Socket::Socket() : serverSocket(-1), clientSocket(-1), port(-1) {}
 
 Socket::~Socket() { Close(); }
+
+int Socket::getServerSocket() const { return serverSocket; }
+
+int Socket::getClientSocket() const { return clientSocket; }
 
 bool Socket::Create(int port) {
   this->port = port;
@@ -63,13 +66,6 @@ bool Socket::Listen(int maxConnections) {
   return true;
 }
 
-void Socket::CloseClient() {
-  if (clientSocket != -1) {
-    close(clientSocket);
-    clientSocket = -1;
-  }
-}
-
 bool Socket::Accept() {
   sockaddr_in clientAddress;
   socklen_t clientAddressSize = sizeof(clientAddress);
@@ -81,56 +77,7 @@ bool Socket::Accept() {
     return false;
   }
 
-  int failedAttempts = 0;
-
-  while (failedAttempts < 3) {
-    string passwordRequest = "Password: ";
-    if (send(clientSocket, passwordRequest.c_str(), passwordRequest.length(),
-             0) < 0) {
-      cerr << YEL "Send failed" NC << endl;
-      Close();
-      return false;
-    }
-
-    char password[1024];
-    int receivedBytes = recv(clientSocket, password, 1024, 0);
-    if (receivedBytes < 0) {
-      cerr << YEL "Receive failed" NC << endl;
-      Close();
-      return false;
-    }
-
-    password[receivedBytes - 1] = '\0';
-    if (string(password) == this->password) {
-      string authenticationSuccess =
-          "Authentication successful. You are now logged in.\n";
-      if (send(clientSocket, authenticationSuccess.c_str(),
-               authenticationSuccess.length(), 0) < 0) {
-        cerr << YEL "Send failed" NC << endl;
-        Close();
-        return false;
-      }
-      return true;
-    } else {
-      failedAttempts++;
-      string incorrectPassword = "Incorrect Password. Please try again.\n";
-      if (send(clientSocket, incorrectPassword.c_str(),
-               incorrectPassword.length(), 0) < 0) {
-        cerr << YEL "Send failed" NC << endl;
-        Close();
-        return false;
-      }
-    }
-  }
-  string incorrectPassword = "Three failed attempts. Disconnecting.";
-  if (send(clientSocket, incorrectPassword.c_str(), incorrectPassword.length(),
-           0) < 0) {
-    cerr << YEL "Send failed" NC << endl;
-    Close();
-    return false;
-  }
-  CloseClient();
-  return false;
+  return true;
 }
 
 bool Socket::Send(const string &message) {
@@ -160,10 +107,10 @@ int Socket::Receive(char *buffer, int bufferSize) {
 }
 
 void Socket::Close() {
-  if (clientSocket != -1) {
-    close(clientSocket);
-  }
   if (serverSocket != -1) {
     close(serverSocket);
+  }
+  if (clientSocket != -1) {
+    close(clientSocket);
   }
 }

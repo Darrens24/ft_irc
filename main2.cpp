@@ -10,13 +10,16 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Server.hpp"
 #include "Socket.hpp"
+#include <cstring>
 #include <iostream>
 #include <string>
+#include <unistd.h>
 
 using namespace std;
 
-int myAtoi(char *str) {
+int myAtoi2(char *str) {
   int res = 0;
   int sign = 1;
   int i = 0;
@@ -36,39 +39,8 @@ int main(int ac, char **av) {
     return 1;
   }
 
-  int port = myAtoi(av[1]);
-
-  string pass = string(av[2]);
-  Socket socket(pass);
-  if (!socket.Create(port) || !socket.Bind() || !socket.Listen(7)) {
-    return 1;
-  }
-
-  if (!socket.Accept()) {
-    return 1;
-  }
-
-  if (!socket.Send("hello\n")) {
-    return 1;
-  }
-
-  cout << "Hello message sent" << endl;
-
-  while (true) {
-    char buffer[1024] = {0};
-    int receivedBytes = socket.Receive(buffer, 1024);
-    if (receivedBytes < 0) {
-      return 1;
-    }
-
-    if (receivedBytes > 0) {
-      cout << buffer;
-      if (string(buffer) == "exit\n") {
-        cout << "Exiting" << endl;
-        break;
-      }
-    }
-  }
+  Server server(myAtoi2(av[1]), av[2]);
+  server.start();
 
   return 0;
 }

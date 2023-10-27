@@ -22,6 +22,11 @@ GRAYDRK			= \033[0;30m
 
 SRC 		= main2.cpp\
 					Socket.cpp\
+					Server.cpp\
+					User.cpp\
+					Channel.cpp\
+					Command.cpp\
+					Join.cpp
 
 OBJS_DIR	= ./objs/
 OBJS 		= ${addprefix ${OBJS_DIR}, $(SRC:.cpp=.o)}
