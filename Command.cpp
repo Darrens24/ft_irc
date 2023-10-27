@@ -13,11 +13,6 @@
 #include "Command.hpp"
 #include "Server.hpp"
 
-<<<<<<< HEAD
-Command::Command(Server *srv) : _srv(srv) {}
-
-Command::~Command() {}
-=======
 #define ERR_NEEDMOREPARAMS(client1, command1)                                  \
   RED "<" + client1 + "> <" + command1 +                                       \
       "> " WHT ":Not enough parameters (461)" NC
@@ -38,11 +33,6 @@ Command::~Command() {}
   RED "<" + client1 + "> <" + command1 +                                       \
       "> " WHT ":Nickname is already in use (433)" NC
 
-#define ERR_NICKCOLLISION(client1, command1, user1, host1)                     \
-  RED "<" + client1 + "> <" + command1 +                                       \
-      "> " WHT ":Nickname collision KILL from <" + user1 + ">@<" + host1 +     \
-      "> (436)" NC
-
 Command::Command(Server *srv) : _srv(srv) {}
 
 Command::~Command() {}
@@ -55,42 +45,67 @@ Pass::Pass(Server *srv) : Command(srv) {}
 
 Pass::~Pass(){};
 
-void Pass::execute(User *client, std::vector<std::string> args) {
-  if (args.empty()) {
+bool Pass::execute(User *client, std::vector<std::string> args) {
+  if (args.size() < 2) {
     client->response(ERR_NEEDMOREPARAMS(client->getHostname(), "PASS"));
+    return false;
   }
-  if (client->getRegistered())
+
+  if (client->getRegistered()) {
     client->response(ERR_ALREADYREGISTERED(client->getHostname()));
-  if (args[1].compare(client->getPasswd()))
+    return false;
+  }
+
+  if (args[1].compare(client->getPasswd())) {
     client->response(ERR_PASSWDISMATCH(client->getHostname()));
+    return false;
+  }
+
   std::string login = GRN "<" + client->getHostname() +
                       "> " W
-                      ": Login succesful, please now enter your username and "
+                      ":Login succesful, please now enter your username and "
                       "nickname with USER [Username] and NICK [Nickname]" NC;
+  client->setRegistered();
   client->response(login);
+  return true;
 }
 
 /*
  *            NICK COMMAND
  * */
-//
-// Nick::Nick(Server *srv) : Command(srv) {}
-//
-// Nick::~Nick(){};
-//
-// void Nick::execute(User *client, std::vector<std::string> args) {
-//   if (args.empty()) {
-//     client->response(ERR_NONICKNAMEGIVEN(client->getHostname()));
-//   }
-//   std::string login =
-//       GRN "<" + client->getHostname() + "> : " W "Nickname has been set" NC;
-//   client->response(login);
-// }
-//
+
+Nick::Nick(Server *srv) : Command(srv) {}
+
+Nick::~Nick(){};
+
+bool Nick::execute(User *client, std::vector<std::string> args) {
+  if (args.size() < 2) {
+    client->response(ERR_NONICKNAMEGIVEN(client->getHostname()));
+    return false;
+  }
+
+  if (args[1].find(":") != std::string::npos ||
+      args[1].find("#") != std::string::npos) {
+    client->response(ERR_ERRONEUSNICKNAME(client->getHostname(), "NICK"));
+    return false;
+  }
+
+  if (this->_srv->isNicknameAvailable(args[1]) == false) {
+    client->response(ERR_NICKNAMEINUSE(client->getHostname(), "NICK"));
+    return false;
+  }
+
+  std::string login =
+      GRN "<" + client->getHostname() + "> " W ":Nickname has been set" NC;
+  client->setNickname(args[1]);
+  client->response(login);
+  return true;
+}
+
 // /*
 //  *            USER COMMAND
 //  * */
-//
+
 // Usercmd::Usercmd(Server *srv) : Command(srv) {}
 //
 // Usercmd::~Usercmd(){};
@@ -102,4 +117,3 @@ void Pass::execute(User *client, std::vector<std::string> args) {
 //                       [Nickname]";
 //   client->response(login);
 // }
->>>>>>> pedro

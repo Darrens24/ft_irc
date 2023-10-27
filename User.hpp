@@ -56,6 +56,7 @@ public:
   // setters
   void setNickname(std::string nickname);
   void setUsername(std::string username);
+  void setRegistered() { _registered = true; }
 
   // getters
   std::string getNickname() const { return _nickname; }

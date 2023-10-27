@@ -50,6 +50,6 @@ void User::setUsername(std::string username) { _username = username; }
 void User::response(const std::string &response) {
   std::string tmp = response + "\r\n";
   if (!tmp.empty())
-    if (send(this->_fd, response.c_str(), response.length(), 0) < 0)
+    if (send(this->_fd, tmp.c_str(), tmp.length(), 0) < 0)
       (void)tmp; // Une erreur?
 }
