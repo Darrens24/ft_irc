@@ -68,31 +68,32 @@ void Pass::execute(User *client, std::vector<std::string> args) {
 /*
  *            NICK COMMAND
  * */
-
-Nick::Nick(Server *srv) : Command(srv) {}
-
-Nick::~Nick(){};
-
-void Nick::execute(User *client, std::vector<std::string> args) {
-  if (args.empty()) {
-    client->response(ERR_NONICKNAMEGIVEN(client->getHostname()));
-  }
-  std::string login =
-      GRN "<" + client->getHostname() + "> : " W "Nickname has been set" NC;
-  client->response(login);
-}
-
-/*
- *            USER COMMAND
- * */
-
-Usercmd::Usercmd(Server *srv) : Command(srv) {}
-
-Usercmd::~Usercmd(){};
-
-void Usercmd::execute(User *client, std::vector<std::string> args) {
-  std::string login = "<" + client->getHostname() +
-                      "> : Login succesful, please now enter your username and "
-                      "nickname with USER [Username] and NICK [Nickname]";
-  client->response(login);
-}
+//
+// Nick::Nick(Server *srv) : Command(srv) {}
+//
+// Nick::~Nick(){};
+//
+// void Nick::execute(User *client, std::vector<std::string> args) {
+//   if (args.empty()) {
+//     client->response(ERR_NONICKNAMEGIVEN(client->getHostname()));
+//   }
+//   std::string login =
+//       GRN "<" + client->getHostname() + "> : " W "Nickname has been set" NC;
+//   client->response(login);
+// }
+//
+// /*
+//  *            USER COMMAND
+//  * */
+//
+// Usercmd::Usercmd(Server *srv) : Command(srv) {}
+//
+// Usercmd::~Usercmd(){};
+//
+// void Usercmd::execute(User *client, std::vector<std::string> args) {
+//   std::string login = "<" + client->getHostname() +
+//                       "> : Login succesful, please now enter your username
+//                       and " "nickname with USER [Username] and NICK
+//                       [Nickname]";
+//   client->response(login);
+// }

@@ -188,15 +188,15 @@ void Server::acceptNewClient() {
   std::cout << GRN "New client connected on port " << hostService << NC
             << std::endl;
 
-  if (this->initChecker(fd) == -1) {
-    close(fd);
-  }
+  // if (this->initChecker(fd) == -1) {
+  //   close(fd);
+  // }
 
   User *newUser;
-  newUser = new User(fd, hostName, hostService);
+  newUser = new User(fd, hostName, hostService, this->_password);
   this->_users.insert(std::make_pair(fd, newUser));
 
-  askUserData(fd);
+  // askUserData(fd);
   // User newUser(fd, hostName, hostService);
   // this->_users.push_back(newUser);
 }
