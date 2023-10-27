@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 12:44:53 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/26 20:10:24 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/27 16:07:32 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
+class Channel;
 
 class User {
 private:
@@ -33,7 +34,8 @@ private:
   int _port;
   std::string _username;
   std::string _nickname;
-
+  std::vector<Channel *> _channelsInvited;
+  
 public:
   // canonical form
   User(int newSock, char host[NI_MAXHOST], char service[NI_MAXSERV]);
@@ -44,10 +46,17 @@ public:
   // setters
   void setNickname(std::string nickname);
   void setUsername(std::string username);
+  void setChannelInvited(Channel *channel);
+
+
 
   // getters
   std::string getNickname() const { return _nickname; }
   int getFd() { return _fd; }
+  std::string getUsername() { return _username; }
+  std::string getHostname()  { return _hostname; }
+  int getPort() { return _port; }
+  std::vector<Channel *> &getChannelsInvited() { return _channelsInvited; }
   // int getSocketClient();
   // struct sockaddr_in getAddrClient();
   // socklen_t getAddrClientSize();

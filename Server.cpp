@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 14:57:54 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/27 09:24:52 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/27 14:43:21 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -344,4 +344,17 @@ std::vector<User *> Server::getUsersOnly()
     }
 
     return usersOnly;
+}
+
+Channel *Server::getChannelByName(std::string name)
+{
+    std::map<std::string, Channel *>::iterator it = _channels.find(name);
+    if (it != _channels.end())
+    {
+        return it->second;
+    }
+    else
+    {
+        return NULL;
+    }
 }

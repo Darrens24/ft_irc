@@ -46,3 +46,11 @@ class Kick : public Command {
 
     void execute(User *client, std::vector<std::string> args);
 };
+
+class Invite : public Command {
+  public:
+    Invite(Server *srv);
+    ~Invite();
+
+    void execute(User *client, std::vector<std::string> args);
+};

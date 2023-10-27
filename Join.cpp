@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/26 11:02:02 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/27 12:53:59 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/27 15:31:55 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,9 +56,7 @@ void Join::execute(User *client, std::vector<std::string> args) {
 
   bool found_channel = false;
   std::vector<std::string> allchannels = myOwnSplit(args[1], ","); 
-  //trim args[2] spaces
   args[2] = trim(args[2]);
-  
   std::vector<std::string> keys = myOwnSplit(args[2], ",");
   
   //map with channel name and key
@@ -66,8 +64,7 @@ void Join::execute(User *client, std::vector<std::string> args) {
   for (std::vector<std::string>::iterator iter = allchannels.begin();
        iter != allchannels.end(); iter++)
   {
-    
-    if (keys.size() > 0)
+    if (keys.size() > 0 )
     {
       channel_key.insert(std::pair<std::string, std::string>(*iter, keys[0]));
       keys.erase(keys.begin());
@@ -77,12 +74,9 @@ void Join::execute(User *client, std::vector<std::string> args) {
       channel_key.insert(std::pair<std::string, std::string>(*iter, ""));
     }
   }
+
+  
   // check if channel exists
-  for(std::map<std::string, std::string>::iterator it = channel_key.begin(); it != channel_key.end(); it++)
-  {
-    std::cout << "channel name: " << it->first << std::endl;
-    std::cout << "channel key: " << it->second << std::endl;
-  }
   for (std::map<std::string, std::string>::iterator it = channel_key.begin();
        it != channel_key.end(); it++)
   {
@@ -99,11 +93,6 @@ void Join::execute(User *client, std::vector<std::string> args) {
           std::cout << "You are already in channel : " << iter->second->getChannelName() << std::endl;
           break;
         }
-        std::cout << "-------------------------" << std::endl;
-        std::cout << "key: " << it->second << std::endl;
-        std::cout << "key of channel: " << iter->second->getKey() << std::endl;
-        std::cout << "-------------------------" << std::endl;
-
         if (it->second != iter->second->getKey())
         {
           std::cout << "Wrong key for channel : " << iter->second->getChannelName() << std::endl;
@@ -128,15 +117,5 @@ void Join::execute(User *client, std::vector<std::string> args) {
                 << newChannel->getOwner()->getNickname() << std::endl;
     }
   }
-    //print all server channels
-  std::cout << "-----------------------" << std::endl;
-  std::cout << "all channels of server " << std::endl;
-  for (std::map<std::string, Channel *>::iterator it =
-          _srv->getChannel().begin();
-      it != _srv->getChannel().end(); it++)
-  {
-    std::cout << it->first << std::endl;
-  }
-  std::cout << "-----------------------" << std::endl;
 
 }
