@@ -140,11 +140,14 @@ void Server::readFromClient(int fd, int i) {
   if (read == 0) {
     std::cout << RED "Couldn't read from client" NC << std::endl;
     close(this->_polls[i].fd);
+    this->_users.erase(this->_polls[i].fd);
     this->_polls.erase(this->_polls.begin() + i);
     return;
   }
   if (this->_users[fd]->getUserRegistered() == false)
     getBasicInfo(fd, buffer);
+  else
+    launchParser(buffer, fd);
 }
 
 bool Server::getBasicInfo(int fd, char buffer[1024]) {
@@ -232,22 +235,18 @@ void Server::launchParser(char buffer[1024], int fd) {
     join.execute(this->_users[fd], array);
     if (this->_users.find(fd) != this->_users.end())
       std::cout << "User found" << std::endl;
-    if (array[0] == "JOIN") {
-      Join join(this);
-      join.execute(this->_users[fd], array);
-    }
-    if (array[0] == "PRIVMSG") {
-      Privmsg privmsg(this);
-      privmsg.execute(this->_users[fd], array);
-    }
-    if (array[0] == "KICK") {
-      Kick kick(this);
-      kick.execute(this->_users[fd], array);
-    }
-    if (array[0] == "INVITE") {
-      Invite invite(this);
-      invite.execute(this->_users[fd], array);
-    }
+  }
+  if (array[0] == "PRIVMSG") {
+    Privmsg privmsg(this);
+    privmsg.execute(this->_users[fd], array);
+  }
+  if (array[0] == "KICK") {
+    Kick kick(this);
+    kick.execute(this->_users[fd], array);
+  }
+  if (array[0] == "INVITE") {
+    Invite invite(this);
+    invite.execute(this->_users[fd], array);
   }
 }
 
