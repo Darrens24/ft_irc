@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 16:20:20 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/26 20:14:55 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/27 12:25:44 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,4 +57,8 @@ User *Channel::getOwner() { return _owner; }
 
 std::string Channel::getChannelName() { return _channelName; }
 
- std::vector<User *> &Channel::getUsersOfChannel() {return this->_users;}
+std::vector<User *> &Channel::getUsersOfChannel() {return this->_users;}
+
+std::string Channel::getKey() {return this->key;}
+
+void Channel::setKey(std::string key) {this->key = key;}

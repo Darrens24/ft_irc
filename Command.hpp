@@ -38,3 +38,11 @@ class Privmsg : public Command {
     void execute(User *client, std::vector<std::string> args);
     void SendPrivateMessage(User *client, std::vector<std::string> args);
 };
+
+class Kick : public Command {
+  public:
+    Kick(Server *srv);
+    ~Kick();
+
+    void execute(User *client, std::vector<std::string> args);
+};

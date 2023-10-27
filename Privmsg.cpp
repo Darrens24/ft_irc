@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/26 11:02:02 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/26 21:55:36 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/27 09:18:09 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,14 +19,13 @@ Privmsg::~Privmsg() {}
 // syntax: Privmsg <target> [<keys>]
 
 void Privmsg::SendPrivateMessage(User *client, std::vector<std::string> args) {
-    //std::cout << "SendPrivateMessage" << std::endl;
     std::vector<User *>allUsers = _srv->getUsersOnly();
     for (std::vector<User *>::iterator it = allUsers.begin();
                 it != allUsers.end(); it++) {
             if ((*it)->getNickname() == args[1]) {
                 send ((*it)->getFd(), "[", 1, 0);
                 send ((*it)->getFd(), client->getNickname().c_str(), client->getNickname().length(), 0);
-                send ((*it)->getFd(), "] ", 1, 0);
+                send ((*it)->getFd(), "] ", 2, 0);
                 send((*it)->getFd(), args[2].c_str(), args[2].length(), 0);
                 send ((*it)->getFd(), "\n", 1, 0);
             }

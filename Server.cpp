@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 14:57:54 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/26 21:37:05 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/27 09:24:52 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,6 +162,11 @@ void Server::launchParser(char buffer[1024], int fd) {
   if (array[0] == "PRIVMSG") {
     Privmsg privmsg(this);
     privmsg.execute(this->_users[fd], array);
+  }
+
+    if (array[0] == "KICK") {
+    Kick kick(this);
+    kick.execute(this->_users[fd], array);
   }
 }
 

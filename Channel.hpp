@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 12:44:53 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/26 20:15:05 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/27 12:25:27 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ private:
   std::string _channelName;
   std::vector<User *> _users;
   User *_owner;
+  std::string key;
 
 public:
   // canonical form
@@ -45,9 +46,11 @@ public:
   
   // setters
   void setOwner(User *u);
-
+  void setKey(std::string key);
+  
   // getters
   User *getOwner();
   std::string getChannelName();
   std::vector<User *> &getUsersOfChannel();
+  std::string getKey();
 };
