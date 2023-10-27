@@ -34,20 +34,20 @@ Server::Server(int port, std::string password)
     std::cout << RED "Socket creation failed" NC << std::endl;
     exit(EXIT_FAILURE);
   }
-  std::cout << GRN "Socket created" NC << std::endl;
+  std::cout << MAG SERVERSPEAK YEL ": Socket created" NC << std::endl;
 
   if (setsockopt(this->_socket, SOL_SOCKET, SO_REUSEADDR, &this->_opt,
                  sizeof(int))) {
     std::cout << RED "Setsockopt failed" NC << std::endl;
     exit(EXIT_FAILURE);
   }
-  std::cout << GRN "Socket reusable" NC << std::endl;
+  std::cout << MAG SERVERSPEAK YEL ": Socket reusable" NC << std::endl;
 
   if (fcntl(this->_socket, F_SETFL, O_NONBLOCK) < 0) {
     std::cout << RED "Fcntl failed" NC << std::endl;
     exit(EXIT_FAILURE);
   }
-  std::cout << GRN "Socket non-blocking" NC << std::endl;
+  std::cout << MAG SERVERSPEAK YEL ": Socket non-blocking" NC << std::endl;
 
   this->_address.sin_family = AF_INET;
   this->_address.sin_addr.s_addr = INADDR_ANY;
@@ -59,13 +59,14 @@ Server::Server(int port, std::string password)
     std::cout << RED "Bind failed" NC << std::endl;
     exit(EXIT_FAILURE);
   }
-  std::cout << GRN "Socket binded" NC << std::endl;
+  std::cout << MAG SERVERSPEAK YEL ": Socket binded" NC << std::endl;
 
   if (listen(this->_socket, this->_maxClients) < 0) {
     std::cout << RED "Listen failed" NC << std::endl;
     exit(EXIT_FAILURE);
   }
-  std::cout << GRN "Server listening on port " << port << NC << std::endl;
+  std::cout << MAG SERVERSPEAK YEL ": Server listening on port " << port << NC
+            << std::endl;
 }
 
 Server::~Server() {}
@@ -95,7 +96,7 @@ void Server::start() {
   serverPoll.revents = 0;
 
   this->_polls.push_back(serverPoll);
-  std::cout << GRN "Poll server created" NC << std::endl;
+  std::cout << MAG SERVERSPEAK YEL ": Poll server created" NC << std::endl;
 
   while (1) {
     int pollCount = poll(&this->_polls[0], this->_polls.size(), -1);
@@ -106,7 +107,8 @@ void Server::start() {
 
     for (long unsigned int i = 0; i < this->_polls.size(); i++) {
       if (this->_polls[i].revents & POLLRDHUP) {
-        std::cout << RED "Client disconnected" NC << std::endl;
+        std::cout << RED CLIENTSPEAK << " " << this->_polls[i].fd
+                  << ": disconnected" NC << std::endl;
         close(this->_polls[i].fd);
         this->_users.erase(this->_polls[i].fd);
         this->_polls.erase(this->_polls.begin() + i);
@@ -117,7 +119,6 @@ void Server::start() {
           this->acceptNewClient();
           break;
         } else if (this->_polls[i].fd) {
-          std::cout << GRN "New message from client" NC << std::endl;
           this->readFromClient(this->_polls[i].fd, i);
           break;
         }
@@ -129,16 +130,16 @@ void Server::start() {
 void Server::readFromClient(int fd, int i) {
   char buffer[1024];
   memset(buffer, 0, 1024);
-  // memset(buffer, 0, 1024);
 
   ssize_t read = recv(fd, buffer, 1024, 0);
-  std::cout << "Message received : " << buffer << std::endl;
+  std::cout << BLU CLIENTSPEAK << " " << this->_polls[i].fd << W << ": "
+            << buffer << NC;
   if (read < 0) {
     std::cout << RED "Recv failed" NC << std::endl;
     exit(EXIT_FAILURE);
   }
   if (read == 0) {
-    std::cout << RED "Client disconnected (read)" NC << std::endl;
+    std::cout << RED "Couldn't read from client" NC << std::endl;
     close(this->_polls[i].fd);
     this->_polls.erase(this->_polls.begin() + i);
     return;
@@ -259,7 +260,8 @@ void Server::acceptNewClient() {
     std::cout << RED "Accept failed" NC << std::endl;
     exit(EXIT_FAILURE);
   }
-  std::cout << GRN "New client accepted" NC << std::endl;
+  std::cout << GRN CLIENTSPEAK " " << fd << W ": New client accepted" NC
+            << std::endl;
   pollfd newPoll;
   newPoll.fd = fd;
   newPoll.events = POLLIN | POLLHUP | POLLRDHUP;
@@ -277,8 +279,8 @@ void Server::acceptNewClient() {
     std::cout << RED "Getnameinfo failed" NC << std::endl;
     exit(EXIT_FAILURE);
   }
-  std::cout << GRN "New client connected on port " << hostService << NC
-            << std::endl;
+  std::cout << GRN CLIENTSPEAK " " << fd << W ": New client connected on port "
+            << hostService << NC << std::endl;
   // char buffer[1024];
   // memset(buffer, 0, 1024);
   // ssize_t bytes_received = recv(fd, buffer, 1024, 0);

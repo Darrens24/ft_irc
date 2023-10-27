@@ -96,9 +96,9 @@ bool Nick::execute(User *client, std::vector<std::string> args) {
     return false;
   }
 
-  std::string login =
-      GRN "<" + client->getHostname() + "> " W ":Nickname has been set" NC;
   client->setNickname(args[1]);
+  std::string login =
+      GRN "<" + client->getNickname() + "> " W ":Nickname has been set" NC;
   client->response(login);
   return true;
 }
@@ -122,11 +122,11 @@ bool Usercmd::execute(User *client, std::vector<std::string> args) {
     return false;
   }
 
-  std::string login =
-      GRN "<" + client->getHostname() + "> " W ":User has been set" NC;
   client->setUsername(args[1]);
   client->setRealName(args[4]);
   client->setUserRegistered();
+  std::string login =
+      GRN "<" + client->getUsername() + "> " W ":User has been set" NC;
   client->response(login);
   return true;
 }

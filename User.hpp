@@ -62,6 +62,7 @@ public:
 
   // getters
   std::string getNickname() const { return _nickname; }
+  std::string getUsername() const { return _username; }
   bool getRegistered() const { return _registered; }
   bool getUserRegistered() const { return _userRegistered; }
   std::string getPasswd() const { return _password; }

@@ -32,6 +32,9 @@
 #include <unistd.h>
 #include <vector>
 
+#define SERVERSPEAK "[SERVER]"
+#define CLIENTSPEAK "[CLIENT]"
+
 class User;
 
 class Server {
