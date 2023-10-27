@@ -18,7 +18,7 @@ public:
     virtual ~Command();
 
     // bool auth_required() const;
-
+    std::string trim(const std::string& str);
     virtual void execute(User *client, std::vector<std::string> args) = 0;
 };
 
@@ -54,3 +54,4 @@ class Invite : public Command {
 
     void execute(User *client, std::vector<std::string> args);
 };
+

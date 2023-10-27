@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/26 11:02:02 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/27 15:31:55 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/27 16:28:25 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,16 +30,7 @@ std::vector<std::string> myOwnSplit(std::string str, std::string sep) {
   return arr;
 }
 
-std::string trim(const std::string& str)
-{
-    size_t first = str.find_first_not_of(' ');
-    if (std::string::npos == first)
-    {
-        return str;
-    }
-    size_t last = str.find_last_not_of(' ');
-    return str.substr(first, (last - first + 1));
-}
+
 
 void Join::execute(User *client, std::vector<std::string> args) {
 

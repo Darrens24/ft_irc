@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 12:44:53 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/27 16:07:32 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/27 16:08:56 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,19 +48,13 @@ public:
   void setUsername(std::string username);
   void setChannelInvited(Channel *channel);
 
-
-
   // getters
-  std::string getNickname() const { return _nickname; }
-  int getFd() { return _fd; }
-  std::string getUsername() { return _username; }
-  std::string getHostname()  { return _hostname; }
   int getPort() { return _port; }
+  int getFd() { return _fd; }
+  std::string getNickname() { return _nickname; }
+  std::string getUsername() { return _username; }
+  std::string getHostname() { return _hostname; }
   std::vector<Channel *> &getChannelsInvited() { return _channelsInvited; }
-  // int getSocketClient();
-  // struct sockaddr_in getAddrClient();
-  // socklen_t getAddrClientSize();
-  // pollfd *getUserfd();
 };
 
 #endif

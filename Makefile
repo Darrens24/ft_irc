@@ -6,7 +6,7 @@
 #    By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/06/08 19:50:26 by pfaria-d          #+#    #+#              #
-#    Updated: 2023/10/27 09:27:48 by feliciencat      ###   ########.fr        #
+#    Updated: 2023/10/27 16:34:59 by feliciencat      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -29,6 +29,7 @@ SRC 		= main2.cpp\
 					Join.cpp \
 					Privmsg.cpp \
 					Kick.cpp \
+					Invite.cpp 
 
 OBJS_DIR	= ./objs/
 OBJS 		= ${addprefix ${OBJS_DIR}, $(SRC:.cpp=.o)}

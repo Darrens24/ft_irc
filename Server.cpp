@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 14:57:54 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/27 14:43:21 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/27 16:49:54 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,20 +153,21 @@ void Server::launchParser(char buffer[1024], int fd) {
   }
   if (this->_users.find(fd) != this->_users.end())
     std::cout << "User found" << std::endl;
-
   if (array[0] == "JOIN") {
     Join join(this);
     join.execute(this->_users[fd], array);
   }
-    
   if (array[0] == "PRIVMSG") {
     Privmsg privmsg(this);
     privmsg.execute(this->_users[fd], array);
   }
-
-    if (array[0] == "KICK") {
+  if (array[0] == "KICK") {
     Kick kick(this);
     kick.execute(this->_users[fd], array);
+  }
+  if (array[0] == "INVITE") {
+    Invite invite(this);
+    invite.execute(this->_users[fd], array);
   }
 }
 
@@ -348,13 +349,27 @@ std::vector<User *> Server::getUsersOnly()
 
 Channel *Server::getChannelByName(std::string name)
 {
-    std::map<std::string, Channel *>::iterator it = _channels.find(name);
-    if (it != _channels.end())
+    std::cout << name << std::endl;
+    //std::map<std::string, Channel *>::iterator it = _channels.find(name);
+    //std::cout << _channels.find(name)->first << std::endl;
+    if (_channels[name] != NULL)
     {
-        return it->second;
+        return _channels[name];
     }
     else
     {
         return NULL;
     }
 }
+
+  User *Server::getUserByNickname(std::string nickname)
+  {
+    for(std::map<int, User *>::iterator it = _users.begin(); it != _users.end(); ++it)
+    {
+        if (it->second->getNickname() == nickname)
+        {
+            return it->second;
+        }
+    }
+    return NULL;
+  }

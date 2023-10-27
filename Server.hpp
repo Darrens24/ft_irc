@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 12:44:53 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/27 14:42:19 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/27 16:47:37 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,7 @@ public:
   int initChecker(int fd);
   void askUserData(int fd);
   Channel *getChannelByName(std::string name);
+  User *getUserByNickname(std::string nickname);
 
   int createChannel(std::string name, User *u);
   int joinChannel(std::string name, User *u);
