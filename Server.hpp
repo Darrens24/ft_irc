@@ -55,9 +55,16 @@ public:
   Server(const Server &cpy);
   Server &operator=(const Server &e);
 
+  // getters
+  std::vector<User *> getUsersOnly();
+
+  // bools
+  bool isNicknameAvailable(std::string nickname);
+
   // methodes
   void start();
   void acceptNewClient();
+  bool getBasicInfo(int fd, char buffer[1024]);
   void readFromClient(int fd, int i);
   void launchParser(char buffer[1024], int fd);
 

@@ -91,6 +91,7 @@ void Server::start() {
   pollfd serverPoll;
   serverPoll.fd = this->_socket;
   serverPoll.events = POLLIN | POLLHUP | POLLRDHUP;
+  // serverPoll.revents = 0;
   serverPoll.revents = 0;
 
   this->_polls.push_back(serverPoll);
@@ -107,6 +108,7 @@ void Server::start() {
       if (this->_polls[i].revents & POLLRDHUP) {
         std::cout << RED "Client disconnected" NC << std::endl;
         close(this->_polls[i].fd);
+        this->_users.erase(this->_polls[i].fd);
         this->_polls.erase(this->_polls.begin() + i);
         break;
       }
@@ -115,6 +117,7 @@ void Server::start() {
           this->acceptNewClient();
           break;
         } else if (this->_polls[i].fd) {
+          std::cout << GRN "New message from client" NC << std::endl;
           this->readFromClient(this->_polls[i].fd, i);
           break;
         }
@@ -125,9 +128,11 @@ void Server::start() {
 
 void Server::readFromClient(int fd, int i) {
   char buffer[1024];
+  memset(buffer, 0, 1024);
   // memset(buffer, 0, 1024);
 
   ssize_t read = recv(fd, buffer, 1024, 0);
+  std::cout << "Message received : " << buffer << std::endl;
   if (read < 0) {
     std::cout << RED "Recv failed" NC << std::endl;
     exit(EXIT_FAILURE);
@@ -138,27 +143,111 @@ void Server::readFromClient(int fd, int i) {
     this->_polls.erase(this->_polls.begin() + i);
     return;
   }
-
-  launchParser(buffer, fd);
+  // if (this->_users[fd]->getUserRegistered() == false)
+  //   getBasicInfo(fd, buffer);
+  // else {
+  //   this->_users[fd]->response(
+  //       "001 dan :Welcome to the Internet Relay Network dan");
+  // }
+  this->_users[fd]->response(
+      "CAP * LS :account-notify extended-join multi-prefix sasl");
 }
+//
+bool Server::getBasicInfo(int fd, char buffer[1024]) {
 
-void Server::launchParser(char buffer[1024], int fd) {
   std::string str(buffer);
-  (void)fd;
   std::vector<std::string> array = mySplit(str, "\r\n\t\v ");
 
-  // std::cout << "Message is : " << buffer << std::endl;
   if (array.size() == 0) {
-    return;
+    return false;
   }
-  if (this->_users.find(fd) != this->_users.end())
-    std::cout << "User found" << std::endl;
-
-  if (array[0] == "JOIN") {
-    Join join(this);
-    join.execute(this->_users[fd], array);
+  if (array[0] == "CAP") {
+    array.erase(array.begin());
+    array.erase(array.begin());
   }
+  if (array[0] == "PASS") {
+    Pass pass(this);
+    if (!pass.execute(this->_users[fd], array)) {
+      return false;
+    }
+    array.erase(array.begin());
+    array.erase(array.begin());
+  }
+  if (array[0] == "NICK") {
+    if (this->_users[fd]->getRegistered() == true) {
+      Nick nick(this);
+      if (!nick.execute(this->_users[fd], array)) {
+        return false;
+      }
+      array.erase(array.begin());
+      array.erase(array.begin());
+    } else {
+      this->_users[fd]->response(RED "You need to set password first" NC);
+    }
+  }
+  if (array[0] == "USER") {
+    if (this->_users[fd]->getRegistered() == true) {
+      Usercmd user(this);
+      if (!user.execute(this->_users[fd], array)) {
+        return false;
+      }
+      array.erase(array.begin());
+      array.erase(array.begin());
+    } else {
+      this->_users[fd]->response(RED "You need to set password first" NC);
+    }
+  }
+  if (!this->_users[fd]->getNickname().empty() &&
+      this->_users[fd]->getUserRegistered() == true &&
+      this->_users[fd]->getRegistered() == true) {
+    this->_users[fd]->response("CAP * LS :multi-prefix sasl");
+  }
+  return true;
 }
+
+bool Server::isNicknameAvailable(std::string username) {
+  for (std::map<int, User *>::iterator it = _users.begin(); it != _users.end();
+       ++it) {
+    if (it->second->getNickname() == username)
+      return false;
+  }
+  return true;
+}
+
+std::vector<User *> Server::getUsersOnly() {
+  std::vector<User *> usersOnly;
+
+  for (std::map<int, User *>::iterator it = _users.begin(); it != _users.end();
+       ++it) {
+    usersOnly.push_back(it->second);
+  }
+
+  return usersOnly;
+}
+
+// void Server::launchParser(char buffer[1024], int fd) {
+//   std::string str(buffer);
+//   (void)fd;
+//   std::vector<std::string> array = mySplit(str, "\r\n\t\v ");
+//
+//   std::cout << "Message is : " << buffer << std::endl;
+//   if (array.size() == 0) {
+//     return;
+//   }
+// if (this->_users.find(fd) != this->_users.end())
+//   std::cout << "User found" << std::endl;
+// std::cout << "Message is : " << buffer << std::endl;
+// if (array.size() == 0) {
+//   return;
+// }
+// if (this->_users.find(fd) != this->_users.end())
+//   std::cout << "User found" << std::endl;
+
+// if (array[0] == "JOIN") {
+//   Join join(this);
+//   join.execute(this->_users[fd], array);
+// }
+// }
 
 void Server::acceptNewClient() {
   int fd = accept(this->_socket, (struct sockaddr *)&this->_address,
@@ -187,91 +276,19 @@ void Server::acceptNewClient() {
   }
   std::cout << GRN "New client connected on port " << hostService << NC
             << std::endl;
-
-  // if (this->initChecker(fd) == -1) {
-  //   close(fd);
-  // }
-
-  User *newUser;
-  newUser = new User(fd, hostName, hostService, this->_password);
-  this->_users.insert(std::make_pair(fd, newUser));
-
-  // askUserData(fd);
-  // User newUser(fd, hostName, hostService);
-  // this->_users.push_back(newUser);
-}
-
-void Server::askUserData(int fd) {
-  send(fd, "Enter your nickname : ", 22, 0);
-  char buffer[1000];
-  ssize_t bytes_received = recv(fd, buffer, 1000, 0);
-  if (bytes_received < 0) {
-    std::cout << RED "Recv failed" NC << std::endl;
-    close(fd);
-    return;
-  }
-
-  for (ssize_t i = 0; i < bytes_received; ++i) {
-    if (buffer[i] == '\n' || buffer[i] == '\r') {
-      buffer[i] = '\0';
-      break;
-    }
-  }
-
-  this->_users[fd]->setNickname(buffer);
-  std::cout << GRN "Nickname set to " << buffer << NC << std::endl;
-  send(fd, "Enter your username : ", 22, 0);
-  bytes_received = recv(fd, buffer, 1000, 0);
-  if (bytes_received < 0) {
-    std::cout << RED "Recv failed" NC << std::endl;
-    close(fd);
-    return;
-  }
-
-  for (ssize_t i = 0; i < bytes_received; ++i) {
-    if (buffer[i] == '\n' || buffer[i] == '\r') {
-      buffer[i] = '\0';
-      break;
-    }
-  }
-
-  this->_users[fd]->setUsername(buffer);
-  std::cout << GRN "Username set to " << buffer << NC << std::endl;
-  // send(fd, "Enter your realname : ", 22, 0);
-  // bytes_received = recv(fd, buffer, 1000, 0);
+  // char buffer[1024];
+  // memset(buffer, 0, 1024);
+  // ssize_t bytes_received = recv(fd, buffer, 1024, 0);
   // if (bytes_received < 0) {
   //   std::cout << RED "Recv failed" NC << std::endl;
   //   close(fd);
   //   return;
   // }
-}
+  // std::cout << "Message is : " << buffer << std::endl;
 
-int Server::initChecker(int fd) {
-  char buffer[1000];
-
-  send(fd, "Enter password : ", 17, 0);
-  ssize_t bytes_received = recv(fd, buffer, 1000, 0);
-  if (bytes_received < 0) {
-    std::cout << RED "Recv failed" NC << std::endl;
-    close(fd);
-    return -1;
-  }
-
-  for (ssize_t i = 0; i < bytes_received; ++i) {
-    if (buffer[i] == '\n' || buffer[i] == '\r') {
-      buffer[i] = '\0';
-      break;
-    }
-  }
-
-  if (strcmp(buffer, this->_password.c_str()) == 0) {
-    std::cout << GRN "Password correct" NC << std::endl;
-    return 0;
-  } else {
-    std::cout << RED "Password incorrect" NC << std::endl;
-    send(fd, "Password incorrect.\n", 20, 0);
-  }
-  return -1;
+  User *newUser;
+  newUser = new User(fd, hostName, hostService, this->_password);
+  this->_users.insert(std::make_pair(fd, newUser));
 }
 
 int Server::createChannel(std::string channelName, User *u) {

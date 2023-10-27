@@ -20,23 +20,23 @@ public:
 
   // bool auth_required() const;
 
-  virtual void execute(User *client, std::vector<std::string> args) = 0;
+  virtual bool execute(User *client, std::vector<std::string> args) = 0;
 };
 
-class Join : public Command {
-public:
-  Join(Server *srv);
-  ~Join();
-
-  void execute(User *client, std::vector<std::string> args);
-};
-
+// class Join : public Command {
+// public:
+//   Join(Server *srv);
+//   ~Join();
+//
+//   void execute(User *client, std::vector<std::string> args);
+// };
+//
 class Usercmd : public Command {
 public:
   Usercmd(Server *srv);
   ~Usercmd();
 
-  void execute(User *client, std::vector<std::string> args);
+  bool execute(User *client, std::vector<std::string> args);
 };
 
 class Nick : public Command {
@@ -44,7 +44,7 @@ public:
   Nick(Server *srv);
   ~Nick();
 
-  void execute(User *client, std::vector<std::string> args);
+  bool execute(User *client, std::vector<std::string> args);
 };
 
 class Pass : public Command {
@@ -52,5 +52,5 @@ public:
   Pass(Server *srv);
   ~Pass();
 
-  void execute(User *client, std::vector<std::string> args);
+  bool execute(User *client, std::vector<std::string> args);
 };
