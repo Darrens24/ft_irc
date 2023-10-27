@@ -14,24 +14,25 @@
 #include "Server.hpp"
 
 #define ERR_NEEDMOREPARAMS(client1, command1)                                  \
-  RED "<" + client1 + "> <" + command1 +                                       \
-      "> " WHT ":Not enough parameters (461)" NC
+  "461 " + client1 + " " + command1 +                                          \
+      " :" RED "Error" WHT ": Not enough parameters" NC
 
 #define ERR_ALREADYREGISTERED(client1)                                         \
-  RED "<" + client1 + "> " WHT ":You may not reregister(462)" NC
+  "462 " + client1 + " :" RED "Error" WHT ": You may not reregister" NC
 
 #define ERR_PASSWDISMATCH(client1)                                             \
-  "464 " + client1 + WHT " :Password incorrect (464)" NC
+  "464 " + client1 + " :" RED "Error" WHT ": Password incorrect" NC
 
 #define ERR_NONICKNAMEGIVEN(client1)                                           \
-  RED "<" + client1 + "> " WHT ":No nickname given (431)" NC
+  "431 " + client1 + " :" RED " Error" WHT ": No nickname given" NC
 
 #define ERR_ERRONEUSNICKNAME(client1, command1)                                \
-  RED "<" + client1 + "> <" + command1 + "> " WHT ":Erroneus nickname (432)" NC
+  "432 " + client1 + " " + command1 +                                          \
+      " :" RED "Error" WHT ": Erroneus nickname" NC
 
 #define ERR_NICKNAMEINUSE(client1, command1)                                   \
-  RED "<" + client1 + "> <" + command1 +                                       \
-      "> " WHT ":Nickname is already in use (433)" NC
+  "433 " + client1 + " " + command1 +                                          \
+      " :" RED "Error" WHT ": Nickname is already in use" NC
 
 Command::Command(Server *srv) : _srv(srv) {}
 
