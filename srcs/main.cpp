@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "Server.hpp"
-#include "Socket.hpp"
 #include <cstring>
 #include <iostream>
 #include <string>

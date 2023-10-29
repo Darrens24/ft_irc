@@ -1,67 +1,61 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2023/06/08 19:50:26 by pfaria-d          #+#    #+#              #
-#    Updated: 2023/10/27 16:34:59 by feliciencat      ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
+NOCOLOR='\033[0m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+ORANGE='\033[0;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+LIGHTGRAY='\033[0;37m'
+DARKGRAY='\033[1;30m'
+LIGHTRED='\033[1;31m'
+LIGHTGREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+LIGHTBLUE='\033[1;34m'
+LIGHTPURPLE='\033[1;35m'
+LIGHTCYAN='\033[1;36m'
+WHITE='\033[1;37m'
 
-NOCOLOR			= \033[0m
-BOLD			= \033[1m
-WHITE			= \033[1;37m
-RED				= \033[0;31m
-LIGHTPURPLE		= \033[1;35m
-CLEAR			= \r\033[K
-LIGHTGRAY		= \033[0;37m
-GREEN			= \033[0;32m
-GRAYDRK			= \033[0;30m
+NAME = ircserv
 
-SRC 		= main2.cpp\
-					Socket.cpp\
-					Server.cpp\
-					User.cpp\
-					Channel.cpp\
-					Command.cpp\
-					Join.cpp \
-					Privmsg.cpp \
-					Kick.cpp \
-					Invite.cpp 
+CC = c++
 
-OBJS_DIR	= ./objs/
-OBJS 		= ${addprefix ${OBJS_DIR}, $(SRC:.cpp=.o)}
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 
-CC 			= c++
+SRC_DIR = srcs
 
-FLAGS		= -Wall -Wextra -Werror -std=c++98
+OBJ_DIR = objs
 
-RM  		= rm -rf
+SRCS = 	$(SRC_DIR)/main.cpp \
+				 	$(SRC_DIR)/Channel.cpp \
+				 	$(SRC_DIR)/User.cpp \
+				 	$(SRC_DIR)/Server.cpp \
+				 	${SRC_DIR}/commands/Command.cpp \
+				 	${SRC_DIR}/commands/Join.cpp \
+				 	${SRC_DIR}/commands/Invite.cpp \
+				 	${SRC_DIR}/commands/Kick.cpp \
+				 	${SRC_DIR}/commands/Privmsg.cpp \
 
-NAME		 = ircserv
+OBJS = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
 
-all: 		$(NAME)
+all: $(NAME)
 
-${OBJS_DIR}%.o: %.cpp
-			@printf "${CLEAR}${LIGHTGRAY}${BOLD}	Compiling...${NOCOLOR}"
-			@$(CC) $(FLAGS) -c $< -o $@
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(@D)
+	@$(CC) $(CXXFLAGS) -I ./headers -c $< -o $@
 
-$(NAME):	$(OBJS)
-			@$(CC) $(FLAGS) $(OBJS) -o $(NAME) 
-			@printf "${CLEAR}${GREEN}${BOLD}	Compiled!\n${NOCOLOR}"
-
-${OBJS}:	| ${OBJS_DIR}
-
-${OBJS_DIR}:
-			@mkdir ${OBJS_DIR}
+$(NAME): $(OBJS)
+	@echo ${LIGHTBLUE}$(NAME) compiling !${NOCOLOR}
+	@$(CC) $(CXXFLAGS) -I ./headers $(OBJS) -o $@
+	@echo ${LIGHTGREEN}$(NAME) compiled !${NOCOLOR}
 
 clean:
-			@printf "${CLEAR}${LIGHTPURPLE}${BOLD}	Cleaned!\n${NOCOLOR}"
-			@$(RM) $(OBJS_DIR)
+	@rm -rf $(OBJ_DIR)
+	@echo ${LIGHTRED}$(NAME) objects removed !${NOCOLOR}
 
-fclean:		clean
-			@$(RM) $(NAME)
+fclean: clean
+	@rm -f $(NAME)
+	@echo ${LIGHTRED}$(NAME) removed !${NOCOLOR}
 
-re:			fclean $(NAME)
+re: fclean all
+
+.PHONY: all clean fclean re

@@ -13,7 +13,6 @@
 #ifndef USER_HPP
 #define USER_HPP
 
-#include "Socket.hpp"
 #include "colors.hpp"
 #include <arpa/inet.h>
 #include <cstring>

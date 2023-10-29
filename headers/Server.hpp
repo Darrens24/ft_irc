@@ -14,7 +14,6 @@
 
 #include "Channel.hpp"
 #include "Command.hpp"
-#include "Socket.hpp"
 #include "User.hpp"
 #include "colors.hpp"
 #include <arpa/inet.h>
