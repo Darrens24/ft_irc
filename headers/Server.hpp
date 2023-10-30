@@ -12,10 +12,8 @@
 
 #pragma once
 
-<<<<<<< HEAD extern bool server_up;
+extern bool server_up;
 
-=======
->>>>>>> edouard
 #include "Channel.hpp"
 #include "Command.hpp"
 #include "User.hpp"
@@ -38,7 +36,7 @@
 #define SERVERSPEAK "[SERVER]"
 #define CLIENTSPEAK "[CLIENT]"
 
-    class User;
+class User;
 
 class Server {
 private:

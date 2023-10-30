@@ -69,15 +69,11 @@ Server::Server(int port, std::string password)
             << std::endl;
 }
 
-<<<<<<< HEAD
 Server::~Server() {
   while (!this->_polls.empty()) {
     this->_polls.pop_back();
   }
 }
-=======
-Server::~Server() {}
->>>>>>> edouard
 
 Server::Server(const Server &cpy)
     : _serverName(cpy._serverName), _password(cpy._password),
@@ -105,11 +101,7 @@ void Server::start() {
   this->_polls.push_back(serverPoll);
   std::cout << MAG SERVERSPEAK YEL ": Poll server created" NC << std::endl;
 
-<<<<<<< HEAD
   while (server_up) {
-=======
-  while (1) {
->>>>>>> edouard
     int pollCount = poll(&this->_polls[0], this->_polls.size(), -1);
     if (pollCount < 0) {
       std::cout << RED "Poll failed" NC << std::endl;
@@ -156,13 +148,9 @@ void Server::readFromClient(int fd, int i) {
     this->_polls.erase(this->_polls.begin() + i);
     return;
   }
-<<<<<<< HEAD
-  if (this->_users[fd]->getUserRegistered() == false)
-=======
   if (this->_users[fd]->getUserRegistered() == false ||
       this->_users[fd]->getRegistered() == false ||
       this->_users[fd]->getNickRegistered() == false)
->>>>>>> edouard
     getBasicInfo(fd, buffer);
   else
     launchParser(buffer, fd);
@@ -178,12 +166,6 @@ bool Server::getBasicInfo(int fd, char buffer[1024]) {
   }
   if (array[0] == "CAP") {
     array.erase(array.begin());
-<<<<<<< HEAD
-    if (array.size() > 0)
-      array.erase(array.begin());
-=======
-    array.erase(array.begin());
->>>>>>> edouard
   }
   if (array[0] == "PASS") {
     Pass pass(this);
@@ -193,10 +175,6 @@ bool Server::getBasicInfo(int fd, char buffer[1024]) {
     array.erase(array.begin());
     array.erase(array.begin());
   }
-<<<<<<< HEAD
-=======
-
->>>>>>> edouard
   if (array[0] == "NICK") {
     if (this->_users[fd]->getRegistered() == true) {
       Nick nick(this);
@@ -226,46 +204,17 @@ bool Server::getBasicInfo(int fd, char buffer[1024]) {
       this->_users[fd]->getRegistered() == true) {
     this->_users[fd]->response("CAP * LS :multi-prefix sasl");
     std::string welcomeMssg = "001 " + this->_users[fd]->getNickname() +
-<<<<<<< HEAD
-                              " :Welcome to the Internet Relay Network bitch";
-=======
                               " :Welcome to the Internet Relay Network";
->>>>>>> edouard
     this->_users[fd]->response(welcomeMssg);
   }
   return true;
 }
 
-<<<<<<< HEAD
-bool Server::isNicknameAvailable(std::string username) {
-  for (std::map<int, User *>::iterator it = _users.begin(); it != _users.end();
-       ++it) {
-    if (it->second->getNickname() == username)
-      return false;
-  }
-  return true;
-}
-
-std::vector<User *> Server::getUsersOnly() {
-  std::vector<User *> usersOnly;
-
-  for (std::map<int, User *>::iterator it = _users.begin(); it != _users.end();
-       ++it) {
-    usersOnly.push_back(it->second);
-  }
-
-  return usersOnly;
-}
-
-=======
->>>>>>> edouard
 void Server::launchParser(char buffer[1024], int fd) {
   std::string str(buffer);
   (void)fd;
   std::vector<std::string> array = mySplit(str, "\r\n\t\v ");
 
-<<<<<<< HEAD
-=======
   if (array[0] == "PASS") {
     Pass pass(this);
     if (!pass.execute(this->_users[fd], array)) {
@@ -298,7 +247,6 @@ void Server::launchParser(char buffer[1024], int fd) {
       this->_users[fd]->response(RED "You need to set password first" NC);
     }
   }
->>>>>>> edouard
   if (array[0] == "JOIN") {
     Join join(this);
     join.execute(this->_users[fd], array);
@@ -353,11 +301,8 @@ void Server::acceptNewClient() {
   this->_users.insert(std::make_pair(fd, newUser));
 }
 
-<<<<<<< HEAD
-=======
 /***\ channels \***/
 
->>>>>>> edouard
 int Server::createChannel(std::string channelName, User *u) {
   Channel *newChannel = new Channel(channelName);
   _channels.insert(std::make_pair(channelName, newChannel));
@@ -397,8 +342,6 @@ User *Server::getUserByNickname(std::string nickname) {
   }
   return NULL;
 }
-<<<<<<< HEAD
-=======
 
 bool Server::isNicknameAvailable(std::string username) {
   for (std::map<int, User *>::iterator it = _users.begin(); it != _users.end();
@@ -419,4 +362,3 @@ std::vector<User *> Server::getUsersOnly() {
 
   return usersOnly;
 }
->>>>>>> edouard

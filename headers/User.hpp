@@ -36,10 +36,7 @@ private:
   std::string _realname;
   std::string _password;
   bool _registered;
-<<<<<<< HEAD
-=======
   bool _nickRegistered;
->>>>>>> edouard
   bool _userRegistered;
   std::vector<Channel *> _channelsInvited;
 
