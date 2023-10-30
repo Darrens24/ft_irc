@@ -16,8 +16,6 @@ Join::Join(Server *srv) : Command(srv) {}
 
 Join::~Join() {}
 
-// syntax: JOIN #<channels> [<keys>]
-
 std::vector<std::string> myOwnSplit(std::string str, std::string sep) {
   char *cstr = const_cast<char *>(str.c_str());
   char *current;
@@ -33,16 +31,13 @@ std::vector<std::string> myOwnSplit(std::string str, std::string sep) {
 bool Join::execute(User *client, std::vector<std::string> args) {
 
   if (args.size() < 2 || args.size() > 4) {
-    std::cout
-        << "construction : 'JOIN #channel1name,#channel2name' 'key1,key2' "
-        << std::endl;
+    client->response(ERR_NEEDMOREPARAMS(client->getNickname(), "JOIN"));
     return false;
   }
   if (args[1][0] == '#') {
     args[1].erase(0, 1);
   } else {
-    std::cout << "construction : 'JOIN #channelname,#channel2name' ..."
-              << std::endl;
+    client->response(ERR_BADCHANMASK(client->getNickname(), "JOIN"));
     return false;
   }
 
@@ -85,35 +80,37 @@ bool Join::execute(User *client, std::vector<std::string> args) {
                                              iter->second->getChannelName()));
           break;
         }
+
         iter->second->addUser(client);
-        std::cout << "Join the channel : " << iter->first << std::endl;
         std::string chan = "#" + iter->first;
-        // std::string welcome = ":" + client->getNickname() + " JOIN " + chan;
-        // std::string mode =
-        //     ":" + client->getNickname() + " MODE " + chan + " +v";
         std::string welcome = ":" + client->getNickname() + "!~" +
                               client->getUsername() + "@localhost JOIN " + chan;
         std::string mode = ":" + client->getNickname() + "!~" +
                            client->getNickname() + "@localhost MODE " + chan +
                            " +v";
+
         iter->second->responseALL(welcome);
         client->response(RPL_TOPIC(client->getNickname(), chan));
+
         std::vector<User *> tmpUsers = iter->second->getUsersOfChannel();
         std::string stringUsers = "";
+
         for (std::vector<User *>::iterator it = tmpUsers.begin();
              it != tmpUsers.end(); it++) {
           stringUsers += (*it)->getNickname() + " ";
         }
+
         iter->second->responseALL(
             RPL_NAMREPLY(client->getUsername(), "=", chan, stringUsers));
         iter->second->responseALL(RPL_ENDOFNAMES(client->getNickname(), chan));
         client->response(mode);
-        iter->second->responseALL("ca marche pas :c");
         break;
       }
     }
+
     if (found_channel == false) {
       Channel *newChannel = new Channel(it->first);
+
       newChannel->addUser(client);
       newChannel->setKey(it->second);
       newChannel->setOwner(client);
@@ -123,18 +120,17 @@ bool Join::execute(User *client, std::vector<std::string> args) {
                 << "' created by " << newChannel->getOwner()->getNickname()
                 << std::endl;
       std::string chan = "#" + it->first;
-      // std::string welcome = ":" + client->getNickname() + " JOIN " + chan;
       std::string welcome = ":" + client->getNickname() + "!~" +
                             client->getUsername() + "@localhost JOIN " + chan;
-      // std::string mode = ":" + client->getNickname() + " MODE " + chan + "
-      // +v";
       std::string mode = ":" + client->getNickname() + "!~" +
                          client->getNickname() + "@localhost MODE " + chan +
                          " +v";
       client->response(welcome);
       client->response(RPL_TOPIC(client->getNickname(), chan));
+
       std::vector<User *> tmpUsers = newChannel->getUsersOfChannel();
       std::string stringUsers = "";
+
       for (std::vector<User *>::iterator it = tmpUsers.begin();
            it != tmpUsers.end(); it++) {
         stringUsers += (*it)->getNickname() + " ";
