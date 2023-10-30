@@ -73,6 +73,10 @@ Server::~Server() {
   while (!this->_polls.empty()) {
     this->_polls.pop_back();
   }
+  while (!this->_users.empty()) {
+    delete this->_users.begin()->second;
+    this->_users.erase(this->_users.begin());
+  }
 }
 
 Server::Server(const Server &cpy)
@@ -113,6 +117,7 @@ void Server::start() {
         std::cout << RED CLIENTSPEAK << " " << this->_polls[i].fd
                   << ": disconnected" NC << std::endl;
         close(this->_polls[i].fd);
+        delete this->_users[this->_polls[i].fd];
         this->_users.erase(this->_polls[i].fd);
         this->_polls.erase(this->_polls.begin() + i);
         break;
@@ -280,7 +285,7 @@ void Server::acceptNewClient() {
             << std::endl;
   pollfd newPoll;
   newPoll.fd = fd;
-  newPoll.events = POLLIN | POLLHUP | POLLHUP;
+  newPoll.events = POLLIN | POLLHUP | POLLRDHUP;
   newPoll.revents = 0;
   this->_polls.push_back(newPoll);
 
