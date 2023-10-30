@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Server.hpp"
+#include "../headers/Server.hpp"
 #include <cstring>
 #include <iostream>
 #include <signal.h>

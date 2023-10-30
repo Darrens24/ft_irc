@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "../headers/Server.hpp"
+#include <string>
 #include <sys/types.h>
 
 std::vector<std::string> mySplit(std::string str, std::string sep) {
@@ -140,10 +141,10 @@ void Server::start() {
 void Server::readFromClient(int fd, int i) {
   char buffer[1024];
   memset(buffer, 0, 1024);
+  std::string save;
+  std::string strbuffer;
 
   ssize_t read = recv(fd, buffer, 1024, 0);
-  std::cout << BLU CLIENTSPEAK << " " << this->_polls[i].fd << W << ": "
-            << buffer << NC;
   if (read < 0) {
     std::cout << RED "Recv failed" NC << std::endl;
     exit(EXIT_FAILURE);
@@ -155,12 +156,22 @@ void Server::readFromClient(int fd, int i) {
     this->_polls.erase(this->_polls.begin() + i);
     return;
   }
-  if (this->_users[fd]->getUserRegistered() == false ||
-      this->_users[fd]->getRegistered() == false ||
-      this->_users[fd]->getNickname() == "")
-    getBasicInfo(fd, buffer);
-  else
-    launchParser(buffer, fd);
+  strbuffer = buffer;
+  if (save.size())
+    strbuffer = save + buffer;
+  std::string tmp = std::string(buffer);
+  if (tmp.find('\n') != tmp.npos) {
+    std::cout << BLU CLIENTSPEAK << " " << this->_polls[i].fd << W << ": "
+              << strbuffer << NC;
+    std::cout << "coucou" << std::endl;
+    if (this->_users[fd]->getUserRegistered() == false ||
+        this->_users[fd]->getRegistered() == false ||
+        this->_users[fd]->getNickname() == "")
+      getBasicInfo(fd, buffer);
+    else
+      launchParser(buffer, fd);
+  } else
+    save = strbuffer;
 }
 
 bool Server::getBasicInfo(int fd, char buffer[1024]) {
