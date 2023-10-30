@@ -36,6 +36,10 @@ private:
   std::string _realname;
   std::string _password;
   bool _registered;
+<<<<<<< HEAD
+=======
+  bool _nickRegistered;
+>>>>>>> edouard
   bool _userRegistered;
   std::vector<Channel *> _channelsInvited;
 
@@ -59,6 +63,7 @@ public:
   void setUsername(std::string username);
   void setRealName(std::string realname);
   void setRegistered() { _registered = true; }
+  void setNickRegistered() { _nickRegistered = true; }
   void setUserRegistered() { _userRegistered = true; }
   void setChannelInvited(Channel *channel);
 
@@ -66,6 +71,7 @@ public:
   std::string getNickname() const { return _nickname; }
   std::string getUsername() const { return _username; }
   bool getRegistered() const { return _registered; }
+  bool getNickRegistered() const { return _nickRegistered; }
   bool getUserRegistered() const { return _userRegistered; }
   std::string getPasswd() const { return _password; }
   std::string getHostname() const { return _hostname; }
