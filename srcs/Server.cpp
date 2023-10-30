@@ -103,7 +103,7 @@ void Server::start() {
 
   while (server_up) {
     int pollCount = poll(&this->_polls[0], this->_polls.size(), -1);
-    if (pollCount < 0) {
+    if (pollCount < 0 && server_up) {
       std::cout << RED "Poll failed" NC << std::endl;
       exit(EXIT_FAILURE);
     }
@@ -166,6 +166,8 @@ bool Server::getBasicInfo(int fd, char buffer[1024]) {
   }
   if (array[0] == "CAP") {
     array.erase(array.begin());
+    if (array.size() > 0)
+      array.erase(array.begin());
   }
   if (array[0] == "PASS") {
     Pass pass(this);
@@ -199,7 +201,7 @@ bool Server::getBasicInfo(int fd, char buffer[1024]) {
       this->_users[fd]->response(RED "You need to set password first" NC);
     }
   }
-  if (!this->_users[fd]->getNickname().empty() &&
+  if (this->_users[fd]->getNickRegistered() == true &&
       this->_users[fd]->getUserRegistered() == true &&
       this->_users[fd]->getRegistered() == true) {
     this->_users[fd]->response("CAP * LS :multi-prefix sasl");
