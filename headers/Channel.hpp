@@ -43,11 +43,12 @@ public:
   // methodes
   int addUser(User *u);
   int isInChannel(User *u);
-  
+  void responseALL(std::string response);
+
   // setters
   void setOwner(User *u);
   void setKey(std::string key);
-  
+
   // getters
   User *getOwner();
   std::string getChannelName();

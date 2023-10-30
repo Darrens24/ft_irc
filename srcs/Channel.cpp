@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Channel.hpp"
+#include "../headers/Channel.hpp"
 
 Channel::Channel(std::string channelName) : _channelName(channelName) {
   // Constructeur
@@ -57,8 +57,15 @@ User *Channel::getOwner() { return _owner; }
 
 std::string Channel::getChannelName() { return _channelName; }
 
-std::vector<User *> &Channel::getUsersOfChannel() {return this->_users;}
+std::vector<User *> &Channel::getUsersOfChannel() { return this->_users; }
 
-std::string Channel::getKey() {return this->key;}
+std::string Channel::getKey() { return this->key; }
 
-void Channel::setKey(std::string key) {this->key = key;}
+void Channel::setKey(std::string key) { this->key = key; }
+
+void Channel::responseALL(std::string response) {
+  for (std::vector<User *>::iterator it = _users.begin(); it != _users.end();
+       it++) {
+    (*it)->response(response);
+  }
+}

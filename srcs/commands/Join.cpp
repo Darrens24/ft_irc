@@ -87,15 +87,16 @@ bool Join::execute(User *client, std::vector<std::string> args) {
         }
         iter->second->addUser(client);
         std::cout << "Join the channel : " << iter->first << std::endl;
-        // std::string welcome = "[#" + iter->first + "]" + "[" +
-        //                       client->getNickname() +
-        //                       "] : Welcome to the channel";
         std::string chan = "#" + iter->first;
         std::string welcome = ":" + client->getNickname() + " JOIN :" + chan;
-        client->response(welcome);
+        std::string mode =
+            ":" + client->getNickname() + " MODE :" + chan + " " + "+i";
+        iter->second->responseALL(welcome);
         client->response(RPL_TOPIC(client->getNickname(), chan));
-        client->response(RPL_NAMREPLY(client->getNickname(), "=", chan));
-        client->response(RPL_ENDOFNAMES(client->getNickname(), chan));
+        iter->second->responseALL(RPL_NAMREPLY(client->getUsername(), "=", chan,
+                                               client->getNickname()));
+        iter->second->responseALL(RPL_ENDOFNAMES(client->getNickname(), chan));
+        client->response(mode);
         break;
       }
     }
@@ -109,15 +110,16 @@ bool Join::execute(User *client, std::vector<std::string> args) {
       std::cout << "Channel : '" << newChannel->getChannelName()
                 << "' created by " << newChannel->getOwner()->getNickname()
                 << std::endl;
-      // std::string welcome = "[#" + it->first + "]" + "[" +
-      //                       client->getNickname() +
-      //                       "] : Welcome to the channel";
       std::string chan = "#" + it->first;
       std::string welcome = ":" + client->getNickname() + " JOIN :" + chan;
+      std::string mode =
+          ":" + client->getNickname() + " MODE :" + chan + " " + "+i";
       client->response(welcome);
       client->response(RPL_TOPIC(client->getNickname(), chan));
-      client->response(RPL_NAMREPLY(client->getNickname(), "=", chan));
+      client->response(RPL_NAMREPLY(client->getUsername(), "=", chan,
+                                    client->getNickname()));
       client->response(RPL_ENDOFNAMES(client->getNickname(), chan));
+      client->response(mode);
     }
   }
   return true;
