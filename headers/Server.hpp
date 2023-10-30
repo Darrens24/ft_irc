@@ -71,9 +71,9 @@ public:
   // init
   void start();
   void acceptNewClient();
-  bool getBasicInfo(int fd, char buffer[1024]);
+  bool getBasicInfo(int fd, std::string str);
   void readFromClient(int fd, int i);
-  void launchParser(char buffer[1024], int fd);
+  void launchParser(std::string str, int fd);
 
   int initChecker(int fd);
   void askUserData(int fd);

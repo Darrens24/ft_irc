@@ -141,7 +141,7 @@ void Server::start() {
 void Server::readFromClient(int fd, int i) {
   char buffer[1024];
   memset(buffer, 0, 1024);
-  std::string save;
+  static std::string save;
   std::string strbuffer;
 
   ssize_t read = recv(fd, buffer, 1024, 0);
@@ -167,16 +167,16 @@ void Server::readFromClient(int fd, int i) {
     if (this->_users[fd]->getUserRegistered() == false ||
         this->_users[fd]->getRegistered() == false ||
         this->_users[fd]->getNickname() == "")
-      getBasicInfo(fd, buffer);
+      getBasicInfo(fd, strbuffer);
     else
-      launchParser(buffer, fd);
+      launchParser(strbuffer, fd);
+    save = "";
   } else
     save = strbuffer;
 }
 
-bool Server::getBasicInfo(int fd, char buffer[1024]) {
+bool Server::getBasicInfo(int fd, std::string str) {
 
-  std::string str(buffer);
   std::vector<std::string> array = mySplit(str, "\r\n\t\v ");
 
   if (array.size() == 0) {
@@ -230,8 +230,7 @@ bool Server::getBasicInfo(int fd, char buffer[1024]) {
   return true;
 }
 
-void Server::launchParser(char buffer[1024], int fd) {
-  std::string str(buffer);
+void Server::launchParser(std::string str, int fd) {
   std::vector<std::string> array = mySplit(str, "\r\n\t\v ");
 
   if (array.size() == 0)
