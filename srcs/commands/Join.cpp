@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/26 11:02:02 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/27 16:28:25 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/30 13:57:06 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ std::vector<std::string> myOwnSplit(std::string str, std::string sep) {
 
 bool Join::execute(User *client, std::vector<std::string> args) {
 
+  std::cout << "Join command" << std::endl;
   if (args.size() < 2 || args.size() > 4) {
     std::cout
         << "construction : 'JOIN #channel1name,#channel2name' 'key1,key2' "
@@ -85,6 +86,15 @@ bool Join::execute(User *client, std::vector<std::string> args) {
                                              iter->second->getChannelName()));
           break;
         }
+        if (iter->second->findMode('i') == true)
+        {
+          if (client->is_invited(iter->second) == false)
+          {
+            client->response(ERR_INVITEONLYCHAN(client->getNickname(),
+                                                iter->second->getChannelName()));
+            break;
+          }  
+        }
         iter->second->addUser(client);
         std::cout << "Join the channel : " << iter->first << std::endl;
         std::cout << "owner: " << iter->second->getOwner()->getNickname()
@@ -96,6 +106,17 @@ bool Join::execute(User *client, std::vector<std::string> args) {
       Channel *newChannel = new Channel(it->first);
       newChannel->addUser(client);
       newChannel->setKey(it->second);
+      if (it->second != "")
+      {
+        newChannel->addMode('k');
+        std::cout << "mode +t added because key is set" << std::endl;
+      }
+      //print the key
+      send (client->getFd(), "key of channel : ", 17, 0);
+      send (client->getFd(), "\'", 2, 0);
+      send (client->getFd(), newChannel->getKey().c_str(), newChannel->getKey().length(), 0);
+      send (client->getFd(), "\'", 2, 0);
+      send (client->getFd(), "\n", 2, 0);
       newChannel->setOwner(client);
       _srv->getChannel().insert(
           std::pair<std::string, Channel *>(it->first, newChannel));
