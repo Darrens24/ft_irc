@@ -13,10 +13,18 @@
 #include "Server.hpp"
 #include <cstring>
 #include <iostream>
+#include <signal.h>
 #include <string>
 #include <unistd.h>
 
 using namespace std;
+bool server_up = true;
+
+void exit_server(int signal) {
+  if (signal == SIGINT) {
+    server_up = false;
+  }
+}
 
 int myAtoi2(char *str) {
   int res = 0;
@@ -38,6 +46,7 @@ int main(int ac, char **av) {
     return 1;
   }
 
+  signal(SIGINT, exit_server);
   Server server(myAtoi2(av[1]), av[2]);
   server.start();
 

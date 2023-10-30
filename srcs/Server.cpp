@@ -69,7 +69,11 @@ Server::Server(int port, std::string password)
             << std::endl;
 }
 
-Server::~Server() {}
+Server::~Server() {
+  while (!this->_polls.empty()) {
+    this->_polls.pop_back();
+  }
+}
 
 Server::Server(const Server &cpy)
     : _serverName(cpy._serverName), _password(cpy._password),
@@ -97,7 +101,7 @@ void Server::start() {
   this->_polls.push_back(serverPoll);
   std::cout << MAG SERVERSPEAK YEL ": Poll server created" NC << std::endl;
 
-  while (1) {
+  while (server_up) {
     int pollCount = poll(&this->_polls[0], this->_polls.size(), -1);
     if (pollCount < 0) {
       std::cout << RED "Poll failed" NC << std::endl;
@@ -160,7 +164,8 @@ bool Server::getBasicInfo(int fd, char buffer[1024]) {
   }
   if (array[0] == "CAP") {
     array.erase(array.begin());
-    array.erase(array.begin());
+    if (array.size() > 0)
+      array.erase(array.begin());
   }
   if (array[0] == "PASS") {
     Pass pass(this);

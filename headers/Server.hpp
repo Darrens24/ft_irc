@@ -12,6 +12,8 @@
 
 #pragma once
 
+extern bool server_up;
+
 #include "Channel.hpp"
 #include "Command.hpp"
 #include "User.hpp"
