@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Server.hpp"
+#include "../headers/Server.hpp"
 #include <sys/types.h>
 
 std::vector<std::string> mySplit(std::string str, std::string sep) {
@@ -117,6 +117,8 @@ void Server::start() {
         std::cout << RED CLIENTSPEAK << " " << this->_polls[i].fd
                   << ": disconnected" NC << std::endl;
         close(this->_polls[i].fd);
+        this->_users[this->_polls[i].fd]->setUserUnregistered();
+        this->_users[this->_polls[i].fd]->setNickUnregistered();
         delete this->_users[this->_polls[i].fd];
         this->_users.erase(this->_polls[i].fd);
         this->_polls.erase(this->_polls.begin() + i);
@@ -155,7 +157,7 @@ void Server::readFromClient(int fd, int i) {
   }
   if (this->_users[fd]->getUserRegistered() == false ||
       this->_users[fd]->getRegistered() == false ||
-      this->_users[fd]->getNickRegistered() == false)
+      this->_users[fd]->getNickname() == "")
     getBasicInfo(fd, buffer);
   else
     launchParser(buffer, fd);
@@ -163,6 +165,7 @@ void Server::readFromClient(int fd, int i) {
 
 bool Server::getBasicInfo(int fd, char buffer[1024]) {
 
+  std::cout << "we BASIC INFO" << std::endl;
   std::string str(buffer);
   std::vector<std::string> array = mySplit(str, "\r\n\t\v ");
 

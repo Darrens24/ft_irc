@@ -62,6 +62,8 @@ public:
   void setRegistered() { _registered = true; }
   void setNickRegistered() { _nickRegistered = true; }
   void setUserRegistered() { _userRegistered = true; }
+  void setNickUnregistered() { _nickRegistered = false; }
+  void setUserUnregistered() { _userRegistered = false; }
   void setChannelInvited(Channel *channel);
 
   // getters

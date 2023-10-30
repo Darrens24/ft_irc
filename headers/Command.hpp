@@ -25,6 +25,15 @@
   "475 " + client1 + " " + channel1 +                                          \
       " :" RED "Error" WHT ": Cannot join channel (+k)" NC
 
+#define RPL_NAMREPLY(client1, symbol1, channel1)                               \
+  "353 " + client1 + " " + symbol1 + " " + channel1 + " :" WHT ": Welcome" NC
+
+#define RPL_ENDOFNAMES(client1, channel1)                                      \
+  "366 " + client1 + " " + channel1 + " :" WHT ": End of /NAMES list" NC
+
+#define RPL_TOPIC(client1, channel1)                                           \
+  "332 " + client1 + " " + channel1 + " :" WHT ": topics" NC
+
 #include "Server.hpp"
 #include <numeric>
 #include <string>
