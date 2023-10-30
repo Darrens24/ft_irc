@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 14:57:54 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/27 16:49:54 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/29 23:04:51 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,7 @@ Server &Server::operator=(const Server &e) {
 void Server::start() {
   pollfd serverPoll;
   serverPoll.fd = this->_socket;
-  serverPoll.events = POLLIN | POLLHUP | POLLRDHUP;
+  serverPoll.events = POLLIN | POLLHUP | POLLHUP;
   serverPoll.revents = 0;
 
   this->_polls.push_back(serverPoll);
@@ -113,7 +113,7 @@ void Server::start() {
     }
 
     for (long unsigned int i = 0; i < this->_polls.size(); i++) {
-      if (this->_polls[i].revents & POLLRDHUP) {
+      if (this->_polls[i].revents & POLLHUP) {
         std::cout << RED CLIENTSPEAK << " " << this->_polls[i].fd
                   << ": disconnected" NC << std::endl;
         close(this->_polls[i].fd);
@@ -260,8 +260,6 @@ void Server::launchParser(char buffer[1024], int fd) {
   if (array[0] == "JOIN") {
     Join join(this);
     join.execute(this->_users[fd], array);
-    if (this->_users.find(fd) != this->_users.end())
-      std::cout << "User found" << std::endl;
   }
   if (array[0] == "PRIVMSG") {
     Privmsg privmsg(this);
@@ -274,6 +272,14 @@ void Server::launchParser(char buffer[1024], int fd) {
   if (array[0] == "INVITE") {
     Invite invite(this);
     invite.execute(this->_users[fd], array);
+  }
+  if (array[0] == "TOPIC") {
+    Topic topic(this);
+    topic.execute(this->_users[fd], array);
+  }
+  if (array[0] == "MODE") {
+    Mode mode(this);
+    mode.execute(this->_users[fd], array);
   }
 }
 
