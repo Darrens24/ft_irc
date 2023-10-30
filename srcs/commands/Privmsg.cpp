@@ -28,7 +28,7 @@ void Privmsg::SendPrivateMessage(User *client, std::vector<std::string> args) {
            client->getNickname().length(), 0);
       send((*it)->getFd(), "] ", 2, 0);
       send((*it)->getFd(), args[2].c_str(), args[2].length(), 0);
-      send((*it)->getFd(), "\n", 1, 0);
+      send((*it)->getFd(), "\r\n", 2, 0);
     }
     (void)client;
   }
@@ -42,6 +42,7 @@ bool Privmsg::execute(User *client, std::vector<std::string> args) {
   }
   if (args[1][0] == '#') { // send to server
     args[1].erase(0, 1);
+    std::cout << "send to channel" << std::endl;
     for (std::map<std::string, Channel *>::iterator it =
              _srv->getChannel().begin();
          it != _srv->getChannel().end(); it++) {
@@ -54,7 +55,7 @@ bool Privmsg::execute(User *client, std::vector<std::string> args) {
                  it->second->getUsersOfChannel().begin();
              iter != it->second->getUsersOfChannel().end(); iter++) {
           send((*iter)->getFd(), args[2].c_str(), args[2].length(), 0);
-          send((*iter)->getFd(), "\n", 1, 0);
+          send((*iter)->getFd(), "\r\n", 2, 0);
         }
 
       } else {

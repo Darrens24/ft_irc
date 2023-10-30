@@ -26,7 +26,7 @@
       " :" RED "Error" WHT ": Cannot join channel (+k)" NC
 
 #define RPL_NAMREPLY(client1, symbol1, channel1, nick1)                        \
-  "353 " + client1 + " " + symbol1 + " " + channel1 + " :" WHT + nick1 + NC
+  "353 " + client1 + " " + symbol1 + " " + channel1 + " :" + nick1
 
 #define RPL_ENDOFNAMES(client1, channel1)                                      \
   "366 " + client1 + " " + channel1 + " :" WHT "End of /NAMES list" NC

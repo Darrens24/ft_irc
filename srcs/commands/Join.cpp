@@ -88,15 +88,22 @@ bool Join::execute(User *client, std::vector<std::string> args) {
         iter->second->addUser(client);
         std::cout << "Join the channel : " << iter->first << std::endl;
         std::string chan = "#" + iter->first;
-        std::string welcome = ":" + client->getNickname() + " JOIN :" + chan;
+        std::string welcome = ":" + client->getNickname() + " JOIN " + chan;
         std::string mode =
-            ":" + client->getNickname() + " MODE :" + chan + " " + "+i";
+            ":" + client->getNickname() + " MODE " + chan + " +v";
         iter->second->responseALL(welcome);
         client->response(RPL_TOPIC(client->getNickname(), chan));
-        iter->second->responseALL(RPL_NAMREPLY(client->getUsername(), "=", chan,
-                                               client->getNickname()));
+        std::vector<User *> tmpUsers = iter->second->getUsersOfChannel();
+        std::string stringUsers = "";
+        for (std::vector<User *>::iterator it = tmpUsers.begin();
+             it != tmpUsers.end(); it++) {
+          stringUsers += (*it)->getNickname() + " ";
+        }
+        iter->second->responseALL(
+            RPL_NAMREPLY(client->getUsername(), "=", chan, stringUsers));
         iter->second->responseALL(RPL_ENDOFNAMES(client->getNickname(), chan));
         client->response(mode);
+        iter->second->responseALL("ca marche pas :c");
         break;
       }
     }
@@ -111,13 +118,18 @@ bool Join::execute(User *client, std::vector<std::string> args) {
                 << "' created by " << newChannel->getOwner()->getNickname()
                 << std::endl;
       std::string chan = "#" + it->first;
-      std::string welcome = ":" + client->getNickname() + " JOIN :" + chan;
-      std::string mode =
-          ":" + client->getNickname() + " MODE :" + chan + " " + "+i";
+      std::string welcome = ":" + client->getNickname() + " JOIN " + chan;
+      std::string mode = ":" + client->getNickname() + " MODE " + chan + " +v";
       client->response(welcome);
       client->response(RPL_TOPIC(client->getNickname(), chan));
-      client->response(RPL_NAMREPLY(client->getUsername(), "=", chan,
-                                    client->getNickname()));
+      std::vector<User *> tmpUsers = newChannel->getUsersOfChannel();
+      std::string stringUsers = "";
+      for (std::vector<User *>::iterator it = tmpUsers.begin();
+           it != tmpUsers.end(); it++) {
+        stringUsers += (*it)->getNickname() + " ";
+      }
+      client->response(
+          RPL_NAMREPLY(client->getUsername(), "=", chan, stringUsers));
       client->response(RPL_ENDOFNAMES(client->getNickname(), chan));
       client->response(mode);
     }
