@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   User.cpp                                           :+:      :+:    :+:   */
+/*   user.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 13:00:52 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/30 16:01:35 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/27 16:03:47 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,43 +42,6 @@ User::User(const User &cpy) { *this = cpy; }
 User &User::operator=(const User &e) {
   _fd = e._fd;
   return *this;
-}
-
-bool User::is_invited(Channel *channel)
-{
-  for (std::vector<Channel *>::iterator it = _channelsInvited.begin(); it != _channelsInvited.end(); it++)
-  {
-    if (*it == channel)
-      return true;
-  }
-  return false;
-}
-
-void User::addChannelWhereUserIsOperator(Channel *channel)
-{
-  _channelsWhereUserIsOperator.push_back(channel);
-}
-
-void User::removeChannelWhereUserIsOperator(Channel *channel)
-{
-  for (std::vector<Channel *>::iterator it = _channelsWhereUserIsOperator.begin(); it != _channelsWhereUserIsOperator.end(); it++)
-  {
-    if (*it == channel)
-    {
-      _channelsWhereUserIsOperator.erase(it);
-      return;
-    }
-  }
-}
-
-bool User::isUserOperator(Channel *channel)
-{
-  for (std::vector<Channel *>::iterator it = _channelsWhereUserIsOperator.begin(); it != _channelsWhereUserIsOperator.end(); it++)
-  {
-    if (*it == channel)
-      return true;
-  }
-  return false;
 }
 
 void User::setNickname(std::string nickname) { _nickname = nickname; }

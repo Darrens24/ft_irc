@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 16:20:20 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/30 12:17:16 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/27 12:25:44 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 
 Channel::Channel(std::string channelName) : _channelName(channelName) {
   // Constructeur
-  key = "";
 }
 
 Channel::~Channel() {
@@ -50,54 +49,6 @@ int Channel::isInChannel(User *u) {
       return 1;
   }
   return 0;
-}
-
-bool Channel::removeMode(char mode)
-{
-  for (std::vector<char>::iterator it = _mode.begin(); it != _mode.end(); it++)
-  {
-    if (*it == mode)
-    {
-      _mode.erase(it);
-      return true;
-    }
-  }
-  return false;
-}
-
-std::string Channel::getModeString()
-{
-  std::string mode = "";
-  for (std::vector<char>::iterator it = _mode.begin(); it != _mode.end(); it++)
-  {
-    mode += *it;
-  }
-  return mode;
-}
-
-bool Channel::addMode(char mode)
-{
-  for (std::vector<char>::iterator it = _mode.begin(); it != _mode.end(); it++)
-  {
-    if (*it == mode)
-    {
-      return false;
-    }
-  }
-  _mode.push_back(mode);
-  return true;
-}
-
-bool Channel::findMode(char mode)
-{
-  for (std::vector<char>::iterator it = _mode.begin(); it != _mode.end(); it++)
-  {
-    if (*it == mode)
-    {
-      return true;
-    }
-  }
-  return false;
 }
 
 void Channel::setOwner(User *u) { _owner = u; }

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   User.hpp                                           :+:      :+:    :+:   */
+/*   user.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 12:44:53 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/30 16:00:28 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/27 16:08:56 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,7 @@ private:
   bool _nickRegistered;
   bool _userRegistered;
   std::vector<Channel *> _channelsInvited;
-  std::vector<Channel *> _channelsWhereUserIsOperator;
-  
+
 public:
   // canonical form
   User(int newSock, char host[NI_MAXHOST], char service[NI_MAXSERV]);
@@ -55,11 +54,7 @@ public:
 
   // methodes
   void response(const std::string &response);
-  bool is_invited(Channel *channel);
-  void addChannelWhereUserIsOperator(Channel *channel);
-  void removeChannelWhereUserIsOperator(Channel *channel);
-  bool isUserOperator(Channel *channel);
-  
+
   // setters
   void setNickname(std::string nickname);
   void setUsername(std::string username);
@@ -82,7 +77,6 @@ public:
   int getPort() { return _port; }
   int getFd() { return _fd; }
   std::vector<Channel *> &getChannelsInvited() { return _channelsInvited; }
-  std::vector<Channel *> &getChannelsWhereUserIsOperator() { return _channelsWhereUserIsOperator; }
 };
 
 #endif

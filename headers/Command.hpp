@@ -24,14 +24,6 @@
 #define ERR_BADCHANNELKEY(client1, channel1)                                   \
   "475 " + client1 + " " + channel1 +                                          \
       " :" RED "Error" WHT ": Cannot join channel (+k)" NC
-  
-#define ERR_INVITEONLYCHAN(client1, channel1)                                  \
-  "473 " + client1 + " " + channel1 +                                          \
-      " :" RED "Error" WHT ": Cannot join channel (+i)" NC
-    
-#define ERR_INVALIDKEY(client1, channel1)                                      \
-  "525 " + client1 + " " + channel1 +                                          \
-      " :" RED "Error" WHT ": Cannot join channel (+k)" NC 
 
 #define ERR_CHANNELISFULL(client1, channel1)                                   \
   "471 " + client1 + " " + channel1 + " :" WHT "Channel is full" NC
@@ -132,22 +124,4 @@ public:
   ~Invite();
 
   bool execute(User *client, std::vector<std::string> args);
-};
-
-class Topic : public Command {
-public:
-  Topic(Server *srv);
-  ~Topic();
-
-  bool execute(User *client, std::vector<std::string> args);
-};
-
-class Mode : public Command {
-public:
-  Mode(Server *srv);
-  ~Mode();
-
-  bool execute(User *client, std::vector<std::string> args);
-  bool execute_differents_modes(User *client, std::vector<std::string> args,  Channel *tmpChan);
-
 };
