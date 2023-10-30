@@ -61,6 +61,7 @@ public:
 
   // getters
   std::vector<User *> getUsersOnly();
+  std::map<std::string, Channel *> &getChannels() { return _channels; }
   Channel *getChannelByName(std::string name);
   User *getUserByNickname(std::string nickname);
 

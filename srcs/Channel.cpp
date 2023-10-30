@@ -43,6 +43,16 @@ int Channel::addUser(User *u) {
   return 0;
 }
 
+void Channel::removeUserFromChannel(User *u) {
+  for (std::vector<User *>::iterator it = _users.begin(); it != _users.end();
+       it++) {
+    if (*it == u) {
+      _users.erase(it);
+      return;
+    }
+  }
+}
+
 int Channel::isInChannel(User *u) {
   for (std::vector<User *>::iterator it = _users.begin(); it != _users.end();
        it++) {

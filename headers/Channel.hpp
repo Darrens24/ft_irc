@@ -45,6 +45,7 @@ public:
   // methodes
   int addUser(User *u);
   int isInChannel(User *u);
+  void removeUserFromChannel(User *u);
   void responseALL(std::string response);
   void responseALLnotMe(std::string response, std::string nick);
   bool removeMode(

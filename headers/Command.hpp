@@ -53,6 +53,10 @@
   "525 " + client1 + " " + channel1 +                                          \
       " :" RED "Error" WHT ": Cannot join channel (+k)" NC
 
+#define ERR_NOTONCHANNEL(client1, channel1)                                    \
+  "442 " + client1 + " " + channel1 + RED "Error" +                            \
+      NC ":" WHT "You're not on that channel" NC
+
 #include "Server.hpp"
 #include <numeric>
 #include <string>
@@ -77,6 +81,14 @@ class Join : public Command {
 public:
   Join(Server *srv);
   ~Join();
+
+  bool execute(User *client, std::vector<std::string> args);
+};
+
+class Part : public Command {
+public:
+  Part(Server *srv);
+  ~Part();
 
   bool execute(User *client, std::vector<std::string> args);
 };

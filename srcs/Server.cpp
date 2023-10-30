@@ -165,7 +165,6 @@ void Server::readFromClient(int fd, int i) {
 
 bool Server::getBasicInfo(int fd, char buffer[1024]) {
 
-  std::cout << "we BASIC INFO" << std::endl;
   std::string str(buffer);
   std::vector<std::string> array = mySplit(str, "\r\n\t\v ");
 
@@ -222,8 +221,10 @@ bool Server::getBasicInfo(int fd, char buffer[1024]) {
 
 void Server::launchParser(char buffer[1024], int fd) {
   std::string str(buffer);
-  (void)fd;
   std::vector<std::string> array = mySplit(str, "\r\n\t\v ");
+
+  if (array.size() == 0)
+    return;
 
   if (array[0] == "PASS") {
     Pass pass(this);
@@ -260,6 +261,10 @@ void Server::launchParser(char buffer[1024], int fd) {
   if (array[0] == "JOIN") {
     Join join(this);
     join.execute(this->_users[fd], array);
+  }
+  if (array[0] == "PART") {
+    Part part(this);
+    part.execute(this->_users[fd], array);
   }
   if (array[0] == "PRIVMSG") {
     Privmsg privmsg(this);

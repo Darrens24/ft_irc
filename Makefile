@@ -36,6 +36,7 @@ SRCS = 	$(SRC_DIR)/main.cpp \
 				 	${SRC_DIR}/commands/Privmsg.cpp \
 				 	${SRC_DIR}/commands/Topic.cpp \
 				 	${SRC_DIR}/commands/Mode.cpp \
+				 	${SRC_DIR}/commands/Part.cpp \
 
 OBJS = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
 
