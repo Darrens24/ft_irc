@@ -49,15 +49,13 @@ bool Join::execute(User *client, std::vector<std::string> args) {
   bool found_channel = false;
   std::vector<std::string> keys;
   std::vector<std::string> allchannels = myOwnSplit(args[1], ",");
-  if (args[2].c_str()) {
+  if (args.size() > 2) {
 
-    std::cout << "on est la frr" << std::endl;
     args[2] = trim(args[2]);
     keys = myOwnSplit(args[2], ",");
   }
 
   // map with channel name and key
-  std::cout << "on est ici frr" << std::endl;
   std::map<std::string, std::string> channel_key;
   for (std::vector<std::string>::iterator iter = allchannels.begin();
        iter != allchannels.end(); iter++) {
@@ -69,7 +67,6 @@ bool Join::execute(User *client, std::vector<std::string> args) {
     }
   }
 
-  std::cout << "on est la frr" << std::endl;
   // check if channel exists
   for (std::map<std::string, std::string>::iterator it = channel_key.begin();
        it != channel_key.end(); it++) {
@@ -80,13 +77,12 @@ bool Join::execute(User *client, std::vector<std::string> args) {
       if (iter->first == it->first) {
         found_channel = true;
         if (iter->second->isInChannel(client)) {
-          std::cout << "You are already in channel : "
-                    << iter->second->getChannelName() << std::endl;
+          client->response("You are already in the channel");
           break;
         }
         if (it->second != iter->second->getKey()) {
-          std::cout << "Wrong key for channel : "
-                    << iter->second->getChannelName() << std::endl;
+          client->response(ERR_BADCHANNELKEY(client->getNickname(),
+                                             iter->second->getChannelName()));
           break;
         }
         iter->second->addUser(client);
@@ -96,7 +92,6 @@ bool Join::execute(User *client, std::vector<std::string> args) {
         break;
       }
     }
-    std::cout << "on est la frr" << std::endl;
     if (found_channel == false) {
       Channel *newChannel = new Channel(it->first);
       newChannel->addUser(client);
