@@ -49,6 +49,10 @@
 #define ERR_NOSUCHNICK(client1, channel1)                                      \
   "401 " + client1 + " " + channel1 + " :" WHT "No such nick" NC
 
+#define ERR_INVALIDKEY(client1, channel1)                                      \
+  "525 " + client1 + " " + channel1 +                                          \
+      " :" RED "Error" WHT ": Cannot join channel (+k)" NC
+
 #include "Server.hpp"
 #include <numeric>
 #include <string>
@@ -124,4 +128,22 @@ public:
   ~Invite();
 
   bool execute(User *client, std::vector<std::string> args);
+};
+
+class Topic : public Command {
+public:
+  Topic(Server *srv);
+  ~Topic();
+
+  bool execute(User *client, std::vector<std::string> args);
+};
+
+class Mode : public Command {
+public:
+  Mode(Server *srv);
+  ~Mode();
+
+  bool execute(User *client, std::vector<std::string> args);
+  bool execute_differents_modes(User *client, std::vector<std::string> args,
+                                Channel *tmpChan);
 };

@@ -39,6 +39,7 @@ private:
   bool _nickRegistered;
   bool _userRegistered;
   std::vector<Channel *> _channelsInvited;
+  std::vector<Channel *> _channelsWhereUserIsOperator;
 
 public:
   // canonical form
@@ -54,6 +55,10 @@ public:
 
   // methodes
   void response(const std::string &response);
+  bool is_invited(Channel *channel);
+  void addChannelWhereUserIsOperator(Channel *channel);
+  void removeChannelWhereUserIsOperator(Channel *channel);
+  bool isUserOperator(Channel *channel);
 
   // setters
   void setNickname(std::string nickname);
@@ -77,6 +82,9 @@ public:
   int getPort() { return _port; }
   int getFd() { return _fd; }
   std::vector<Channel *> &getChannelsInvited() { return _channelsInvited; }
+  std::vector<Channel *> &getChannelsWhereUserIsOperator() {
+    return _channelsWhereUserIsOperator;
+  }
 };
 
 #endif

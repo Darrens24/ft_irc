@@ -10,8 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "User.hpp"
-#include "Server.hpp"
+#include "../headers/User.hpp"
+#include "../headers/Server.hpp"
 
 int myAtoi(char *str) {
   int res = 0;
@@ -42,6 +42,40 @@ User::User(const User &cpy) { *this = cpy; }
 User &User::operator=(const User &e) {
   _fd = e._fd;
   return *this;
+}
+
+bool User::is_invited(Channel *channel) {
+  for (std::vector<Channel *>::iterator it = _channelsInvited.begin();
+       it != _channelsInvited.end(); it++) {
+    if (*it == channel)
+      return true;
+  }
+  return false;
+}
+
+void User::addChannelWhereUserIsOperator(Channel *channel) {
+  _channelsWhereUserIsOperator.push_back(channel);
+}
+
+void User::removeChannelWhereUserIsOperator(Channel *channel) {
+  for (std::vector<Channel *>::iterator it =
+           _channelsWhereUserIsOperator.begin();
+       it != _channelsWhereUserIsOperator.end(); it++) {
+    if (*it == channel) {
+      _channelsWhereUserIsOperator.erase(it);
+      return;
+    }
+  }
+}
+
+bool User::isUserOperator(Channel *channel) {
+  for (std::vector<Channel *>::iterator it =
+           _channelsWhereUserIsOperator.begin();
+       it != _channelsWhereUserIsOperator.end(); it++) {
+    if (*it == channel)
+      return true;
+  }
+  return false;
 }
 
 void User::setNickname(std::string nickname) { _nickname = nickname; }

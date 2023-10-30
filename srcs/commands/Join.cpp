@@ -81,6 +81,13 @@ bool Join::execute(User *client, std::vector<std::string> args) {
           break;
         }
 
+        if (iter->second->findMode('i') == true) {
+          if (client->is_invited(iter->second) == false) {
+            client->response(ERR_INVITEONLYCHAN(
+                client->getNickname(), iter->second->getChannelName()));
+            break;
+          }
+        }
         iter->second->addUser(client);
         std::string chan = "#" + iter->first;
         std::string welcome = ":" + client->getNickname() + "!~" +
@@ -113,6 +120,10 @@ bool Join::execute(User *client, std::vector<std::string> args) {
 
       newChannel->addUser(client);
       newChannel->setKey(it->second);
+      if (it->second != "") {
+        newChannel->addMode('k');
+        std::cout << "mode +k added because key is set" << std::endl;
+      }
       newChannel->setOwner(client);
       _srv->getChannel().insert(
           std::pair<std::string, Channel *>(it->first, newChannel));

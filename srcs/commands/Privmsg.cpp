@@ -28,11 +28,11 @@ void Privmsg::SendPrivateMessage(User *client, std::vector<std::string> args) {
                             client->getNickname() + "@localhost PRIVMSG " +
                             (*it)->getNickname() + " " + msg;
       (*it)->response(message);
-    } else {
-      client->response(ERR_NOSUCHNICK(client->getNickname(), args[1]));
       return;
     }
   }
+  client->response(ERR_NOSUCHNICK(client->getNickname(), args[1]));
+  return;
 }
 
 bool Privmsg::execute(User *client, std::vector<std::string> args) {

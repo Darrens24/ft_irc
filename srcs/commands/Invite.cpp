@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Command.hpp"
+#include "../../headers/Command.hpp"
 
 Invite::Invite(Server *srv) : Command(srv) {}
 
@@ -30,9 +30,7 @@ bool Invite::execute(User *client, std::vector<std::string> args) {
     return false;
   }
   Channel *tmpChan = _srv->getChannelByName(args[2]);
-  std::cout << "tmpChan : " << tmpChan << std::endl;
   User *tmpUser = _srv->getUserByNickname(args[1]);
-  std::cout << "tmpUser : " << tmpUser << std::endl;
   if (tmpChan == NULL) {
     std::cout << "Channel doesn't exist" << std::endl; // ERR_NOSUCHCHANNEL
     return false;
@@ -61,7 +59,11 @@ bool Invite::execute(User *client, std::vector<std::string> args) {
   send(tmpUser->getFd(), "You have been invited to join channel : ", 41, 0);
   send(tmpUser->getFd(), tmpChan->getChannelName().c_str(),
        tmpChan->getChannelName().length(), 0);
-  send(tmpUser->getFd(), "\n", 2, 0);
+  send(tmpUser->getFd(), "\r\n", 2, 0);
+  send(tmpUser->getFd(), "If you want copy : JOIN #", 26, 0);
+  send(tmpUser->getFd(), tmpChan->getChannelName().c_str(),
+       tmpChan->getChannelName().length(), 0);
+  send(tmpUser->getFd(), "\r\n", 2, 0);
 
   return true;
 }

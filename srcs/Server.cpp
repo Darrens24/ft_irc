@@ -230,8 +230,8 @@ void Server::launchParser(char buffer[1024], int fd) {
     if (!pass.execute(this->_users[fd], array)) {
       return;
     }
-    array.erase(array.begin());
-    array.erase(array.begin());
+    // array.erase(array.begin());
+    // array.erase(array.begin());
   }
   if (array[0] == "NICK") {
     if (this->_users[fd]->getRegistered() == true) {
@@ -239,8 +239,8 @@ void Server::launchParser(char buffer[1024], int fd) {
       if (!nick.execute(this->_users[fd], array)) {
         return;
       }
-      array.erase(array.begin());
-      array.erase(array.begin());
+      // array.erase(array.begin());
+      // array.erase(array.begin());
     } else {
       this->_users[fd]->response(RED "You need to set password first" NC);
     }
@@ -251,8 +251,8 @@ void Server::launchParser(char buffer[1024], int fd) {
       if (!user.execute(this->_users[fd], array)) {
         return;
       }
-      array.erase(array.begin());
-      array.erase(array.begin());
+      // array.erase(array.begin());
+      // array.erase(array.begin());
     } else {
       this->_users[fd]->response(RED "You need to set password first" NC);
     }
@@ -260,8 +260,6 @@ void Server::launchParser(char buffer[1024], int fd) {
   if (array[0] == "JOIN") {
     Join join(this);
     join.execute(this->_users[fd], array);
-    if (this->_users.find(fd) != this->_users.end())
-      std::cout << "User found" << std::endl;
   }
   if (array[0] == "PRIVMSG") {
     Privmsg privmsg(this);
@@ -274,6 +272,14 @@ void Server::launchParser(char buffer[1024], int fd) {
   if (array[0] == "INVITE") {
     Invite invite(this);
     invite.execute(this->_users[fd], array);
+  }
+  if (array[0] == "TOPIC") {
+    Topic topic(this);
+    topic.execute(this->_users[fd], array);
+  }
+  if (array[0] == "MODE") {
+    Mode mode(this);
+    mode.execute(this->_users[fd], array);
   }
 }
 
