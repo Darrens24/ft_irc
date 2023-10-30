@@ -26,10 +26,10 @@
       " :" RED "Error" WHT ": Cannot join channel (+k)" NC
 
 #define RPL_NAMREPLY(client1, symbol1, channel1, nick1)                        \
-  "353 " + client1 + " " + symbol1 + " " + channel1 + " :" + nick1
+  ":ft_irc 353 " + client1 + " " + symbol1 + " " + channel1 + " :" + nick1
 
 #define RPL_ENDOFNAMES(client1, channel1)                                      \
-  "366 " + client1 + " " + channel1 + " :" WHT "End of /NAMES list" NC
+  ":ft_irc 366 " + client1 + " " + channel1 + " :" WHT "End of /NAMES list" NC
 
 #define RPL_TOPIC(client1, channel1)                                           \
   "332 " + client1 + " " + channel1 + " :" WHT "topics" NC

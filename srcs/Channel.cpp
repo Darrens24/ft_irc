@@ -69,3 +69,11 @@ void Channel::responseALL(std::string response) {
     (*it)->response(response);
   }
 }
+
+void Channel::responseALLnotMe(std::string response, std::string nick) {
+  for (std::vector<User *>::iterator it = _users.begin(); it != _users.end();
+       it++) {
+    if (nick != (*it)->getNickname())
+      (*it)->response(response);
+  }
+}

@@ -44,6 +44,7 @@ public:
   int addUser(User *u);
   int isInChannel(User *u);
   void responseALL(std::string response);
+  void responseALLnotMe(std::string response, std::string nick);
 
   // setters
   void setOwner(User *u);

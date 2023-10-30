@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Command.hpp"
+#include "../../headers/Command.hpp"
 
 Privmsg::Privmsg(Server *srv) : Command(srv) {}
 
@@ -23,12 +23,13 @@ void Privmsg::SendPrivateMessage(User *client, std::vector<std::string> args) {
   for (std::vector<User *>::iterator it = allUsers.begin();
        it != allUsers.end(); it++) {
     if ((*it)->getNickname() == args[1]) {
-      send((*it)->getFd(), "[", 1, 0);
-      send((*it)->getFd(), client->getNickname().c_str(),
-           client->getNickname().length(), 0);
-      send((*it)->getFd(), "] ", 2, 0);
-      send((*it)->getFd(), args[2].c_str(), args[2].length(), 0);
-      send((*it)->getFd(), "\r\n", 2, 0);
+      std::string msg;
+      for (long unsigned int i = 2; i < args.size(); i++)
+        msg += args[i] + " ";
+      std::string message = ":" + client->getNickname() + "!~" +
+                            client->getNickname() + "@localhost PRIVMSG " +
+                            (*it)->getNickname() + " " + msg;
+      (*it)->response(message);
     }
     (void)client;
   }
@@ -51,12 +52,13 @@ bool Privmsg::execute(User *client, std::vector<std::string> args) {
           std::cout << "You are not in this channel" << std::endl;
           return false;
         }
-        for (std::vector<User *>::iterator iter =
-                 it->second->getUsersOfChannel().begin();
-             iter != it->second->getUsersOfChannel().end(); iter++) {
-          send((*iter)->getFd(), args[2].c_str(), args[2].length(), 0);
-          send((*iter)->getFd(), "\r\n", 2, 0);
-        }
+        std::string msg;
+        std::string channel = "#" + it->second->getChannelName();
+        for (long unsigned int i = 2; i < args.size(); i++)
+          msg += args[i] + " ";
+        std::string message =
+            ":" + client->getNickname() + " PRIVMSG " + channel + " " + msg;
+        it->second->responseALLnotMe(message, client->getNickname());
 
       } else {
         std::cout << "This channel doesn't exist" << std::endl;

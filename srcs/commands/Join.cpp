@@ -88,9 +88,14 @@ bool Join::execute(User *client, std::vector<std::string> args) {
         iter->second->addUser(client);
         std::cout << "Join the channel : " << iter->first << std::endl;
         std::string chan = "#" + iter->first;
-        std::string welcome = ":" + client->getNickname() + " JOIN " + chan;
-        std::string mode =
-            ":" + client->getNickname() + " MODE " + chan + " +v";
+        // std::string welcome = ":" + client->getNickname() + " JOIN " + chan;
+        // std::string mode =
+        //     ":" + client->getNickname() + " MODE " + chan + " +v";
+        std::string welcome = ":" + client->getNickname() + "!~" +
+                              client->getUsername() + "@localhost JOIN " + chan;
+        std::string mode = ":" + client->getNickname() + "!~" +
+                           client->getNickname() + "@localhost MODE " + chan +
+                           " +v";
         iter->second->responseALL(welcome);
         client->response(RPL_TOPIC(client->getNickname(), chan));
         std::vector<User *> tmpUsers = iter->second->getUsersOfChannel();
@@ -118,8 +123,14 @@ bool Join::execute(User *client, std::vector<std::string> args) {
                 << "' created by " << newChannel->getOwner()->getNickname()
                 << std::endl;
       std::string chan = "#" + it->first;
-      std::string welcome = ":" + client->getNickname() + " JOIN " + chan;
-      std::string mode = ":" + client->getNickname() + " MODE " + chan + " +v";
+      // std::string welcome = ":" + client->getNickname() + " JOIN " + chan;
+      std::string welcome = ":" + client->getNickname() + "!~" +
+                            client->getUsername() + "@localhost JOIN " + chan;
+      // std::string mode = ":" + client->getNickname() + " MODE " + chan + "
+      // +v";
+      std::string mode = ":" + client->getNickname() + "!~" +
+                         client->getNickname() + "@localhost MODE " + chan +
+                         " +v";
       client->response(welcome);
       client->response(RPL_TOPIC(client->getNickname(), chan));
       std::vector<User *> tmpUsers = newChannel->getUsersOfChannel();
