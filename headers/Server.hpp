@@ -66,6 +66,9 @@ public:
   Channel *getChannelByName(std::string name);
   User *getUserByNickname(std::string nickname);
   std::string getUserPort(int fd);
+  struct sockaddr_in &getAddr() { return _address; }
+  std::string getPassword() { return _password; }
+  int getPort() { return _port; }
 
   // bools
   bool isNicknameAvailable(std::string nickname);
