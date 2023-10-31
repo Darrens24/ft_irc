@@ -34,7 +34,7 @@ extern bool server_up;
 #include <vector>
 
 #define SERVERSPEAK "[SERVER]"
-#define CLIENTSPEAK "[CLIENT]"
+#define CLIENTSPEAK(port) "[CLIENT " + port + "]"
 
 class User;
 
@@ -51,6 +51,7 @@ private:
   std::map<int, User *> _users;
   std::vector<pollfd> _polls;
   std::map<std::string, Channel *> _channels;
+  std::map<int, std::string> _userport;
 
 public:
   // canonical form
@@ -64,6 +65,7 @@ public:
   std::map<std::string, Channel *> &getChannels() { return _channels; }
   Channel *getChannelByName(std::string name);
   User *getUserByNickname(std::string nickname);
+  std::string getUserPort(int fd);
 
   // bools
   bool isNicknameAvailable(std::string nickname);

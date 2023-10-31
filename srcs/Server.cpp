@@ -32,20 +32,21 @@ Server::Server(int port, std::string password)
 
   this->_socket = socket(AF_INET, SOCK_STREAM, 0);
   if (this->_socket == -1) {
-    std::cout << RED "Socket creation failed" NC << std::endl;
+    std::cout << RED SERVERSPEAK " Error: Socket creation failed" NC
+              << std::endl;
     exit(EXIT_FAILURE);
   }
   std::cout << MAG SERVERSPEAK YEL ": Socket created" NC << std::endl;
 
   if (setsockopt(this->_socket, SOL_SOCKET, SO_REUSEADDR, &this->_opt,
                  sizeof(int))) {
-    std::cout << RED "Setsockopt failed" NC << std::endl;
+    std::cout << RED SERVERSPEAK " Error: Setsockopt failed" NC << std::endl;
     exit(EXIT_FAILURE);
   }
   std::cout << MAG SERVERSPEAK YEL ": Socket reusable" NC << std::endl;
 
   if (fcntl(this->_socket, F_SETFL, O_NONBLOCK) < 0) {
-    std::cout << RED "Fcntl failed" NC << std::endl;
+    std::cout << RED SERVERSPEAK " Error: Fcntl failed" NC << std::endl;
     exit(EXIT_FAILURE);
   }
   std::cout << MAG SERVERSPEAK YEL ": Socket non-blocking" NC << std::endl;
@@ -57,13 +58,13 @@ Server::Server(int port, std::string password)
 
   if (bind(this->_socket, (struct sockaddr *)&this->_address,
            sizeof(this->_address)) < 0) {
-    std::cout << RED "Bind failed" NC << std::endl;
+    std::cout << RED SERVERSPEAK " Error: Bind failed" NC << std::endl;
     exit(EXIT_FAILURE);
   }
   std::cout << MAG SERVERSPEAK YEL ": Socket binded" NC << std::endl;
 
   if (listen(this->_socket, this->_maxClients) < 0) {
-    std::cout << RED "Listen failed" NC << std::endl;
+    std::cout << RED SERVERSPEAK " Error: Listen failed" NC << std::endl;
     exit(EXIT_FAILURE);
   }
   std::cout << MAG SERVERSPEAK YEL ": Server listening on port " << port << NC
@@ -109,14 +110,14 @@ void Server::start() {
   while (server_up) {
     int pollCount = poll(&this->_polls[0], this->_polls.size(), -1);
     if (pollCount < 0 && server_up) {
-      std::cout << RED "Poll failed" NC << std::endl;
+      std::cout << RED SERVERSPEAK " Error: Poll failed" NC << std::endl;
       exit(EXIT_FAILURE);
     }
 
     for (long unsigned int i = 0; i < this->_polls.size(); i++) {
       if (this->_polls[i].revents & POLLRDHUP) {
-        std::cout << RED CLIENTSPEAK << " " << this->_polls[i].fd
-                  << ": disconnected" NC << std::endl;
+        std::cout << RED CLIENTSPEAK(this->_userport[this->_polls[i].fd])
+                  << ": Disconnected" NC << std::endl;
         close(this->_polls[i].fd);
         this->_users[this->_polls[i].fd]->setUserUnregistered();
         this->_users[this->_polls[i].fd]->setNickUnregistered();
@@ -146,11 +147,12 @@ void Server::readFromClient(int fd, int i) {
 
   ssize_t read = recv(fd, buffer, 1024, 0);
   if (read < 0) {
-    std::cout << RED "Recv failed" NC << std::endl;
+    std::cout << RED SERVERSPEAK " Error: Recv failed" NC << std::endl;
     exit(EXIT_FAILURE);
   }
   if (read == 0) {
-    std::cout << RED "Couldn't read from client" NC << std::endl;
+    std::cout << RED SERVERSPEAK " Error: Couldn't read from client" NC
+              << std::endl;
     close(this->_polls[i].fd);
     this->_users.erase(this->_polls[i].fd);
     this->_polls.erase(this->_polls.begin() + i);
@@ -161,9 +163,8 @@ void Server::readFromClient(int fd, int i) {
     strbuffer = save + buffer;
   std::string tmp = std::string(buffer);
   if (tmp.find('\n') != tmp.npos) {
-    std::cout << BLU CLIENTSPEAK << " " << this->_polls[i].fd << W << ": "
-              << strbuffer << NC;
-    std::cout << "coucou" << std::endl;
+    std::cout << BLU CLIENTSPEAK(this->_userport[fd]) << W << ": " << strbuffer
+              << NC;
     if (this->_users[fd]->getUserRegistered() == false ||
         this->_users[fd]->getRegistered() == false ||
         this->_users[fd]->getNickname() == "")
@@ -302,11 +303,10 @@ void Server::acceptNewClient() {
   int fd = accept(this->_socket, (struct sockaddr *)&this->_address,
                   (socklen_t *)&this->_addrLen);
   if (fd < 0) {
-    std::cout << RED "Accept failed" NC << std::endl;
+    std::cout << RED SERVERSPEAK " Error: Accept failed" NC << std::endl;
     exit(EXIT_FAILURE);
   }
-  std::cout << GRN CLIENTSPEAK " " << fd << W ": New client accepted" NC
-            << std::endl;
+  std::cout << GRN SERVERSPEAK << W ": New client accepted" NC << std::endl;
   pollfd newPoll;
   newPoll.fd = fd;
   newPoll.events = POLLIN | POLLHUP | POLLRDHUP;
@@ -321,11 +321,13 @@ void Server::acceptNewClient() {
   int res = getnameinfo((struct sockaddr *)&this->_address, this->_addrLen,
                         hostName, NI_MAXHOST, hostService, NI_MAXSERV, 0);
   if (res) {
-    std::cout << RED "Getnameinfo failed" NC << std::endl;
+    std::cout << RED SERVERSPEAK " Error: Getnameinfo failed" NC << std::endl;
     exit(EXIT_FAILURE);
   }
-  std::cout << GRN CLIENTSPEAK " " << fd << W ": New client connected on port "
-            << hostService << NC << std::endl;
+  this->_userport[fd] = hostService;
+  std::cout << GRN CLIENTSPEAK(this->_userport[fd])
+            << W ": New client connected on port " << hostService << NC
+            << std::endl;
 
   User *newUser;
   newUser = new User(fd, hostName, hostService, this->_password);
@@ -356,7 +358,6 @@ std::string sendMsgToChannel(std::string target, std::string msg, User *u);
 std::map<std::string, Channel *> &Server::getChannel() { return _channels; }
 
 Channel *Server::getChannelByName(std::string name) {
-  std::cout << name << std::endl;
   if (_channels[name] != NULL) {
     return _channels[name];
   } else {
@@ -393,3 +394,5 @@ std::vector<User *> Server::getUsersOnly() {
 
   return usersOnly;
 }
+
+std::string Server::getUserPort(int fd) { return this->_userport[fd]; }

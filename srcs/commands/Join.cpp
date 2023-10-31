@@ -122,14 +122,15 @@ bool Join::execute(User *client, std::vector<std::string> args) {
       newChannel->setKey(it->second);
       if (it->second != "") {
         newChannel->addMode('k');
-        std::cout << "mode +k added because key is set" << std::endl;
+        std::cout << BLU CLIENTSPEAK(this->_srv->getUserPort(client->getFd()))
+                  << W ": The channel below has a password" NC << std::endl;
       }
       newChannel->setOwner(client);
       _srv->getChannel().insert(
           std::pair<std::string, Channel *>(it->first, newChannel));
-      std::cout << "Channel : '" << newChannel->getChannelName()
-                << "' created by " << newChannel->getOwner()->getNickname()
-                << std::endl;
+      std::cout << BLU CLIENTSPEAK(this->_srv->getUserPort(client->getFd()))
+                << W ": Created the channel " << newChannel->getChannelName()
+                << NC << std::endl;
       std::string chan = "#" + it->first;
       std::string welcome = ":" + client->getNickname() + "!~" +
                             client->getUsername() + "@localhost JOIN " + chan;

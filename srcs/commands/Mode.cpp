@@ -172,7 +172,7 @@ bool Mode::execute(User *client, std::vector<std::string> args) {
   if (args[1][0] == '#') {
     args[1].erase(0, 1);
   } else {
-    std::cout << "construction : 'MODE <#channel> <mode>' " << std::endl;
+    // std::cout << "construction : 'MODE <#channel> <mode>' " << std::endl;
     return false;
   }
   Channel *tmpChan = _srv->getChannelByName(args[1]);
