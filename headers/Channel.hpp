@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 12:44:53 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/30 22:21:40 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/31 13:54:03 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,8 @@ public:
   bool findMode(char mode);
   //std::vector<User *> &getOperators();
   std::string getModeString();
-
+  void sentMessageToAllMembers(std::string message);
+  
   // setters
   void setOwner(User *u);
   void setKey(std::string key);
@@ -72,4 +73,5 @@ public:
   std::string getTopic() { return _topic; };
   std::vector<char> getMode() { return _mode; };
   unsigned int getLimit() { return _limit; };
+  unsigned int getNumberofUsers() { return _users.size(); };
 };

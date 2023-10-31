@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/27 19:03:52 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/30 21:36:55 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/31 15:24:00 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ argument (or an empty argument if the topic was cleared) alerting them to how th
 bool Topic::execute(User *client, std::vector<std::string> args) {
   
   if (args.size() < 2 || args.size() > 4) {
-    std::cout << "wrong arguments" << std::endl;
+    client->response(ERR_NEEDMOREPARAMS(client->getNickname(), "TOPIC"));
     return false;
   }
   //if only one argument, return the topic of the channel
@@ -38,30 +38,28 @@ bool Topic::execute(User *client, std::vector<std::string> args) {
         }
         else
         {
-            std::cout << "construction : 'TOPIC <#channel> :<topic>' " << std::endl;
+            client->response(ERR_NEEDMOREPARAMS(client->getNickname(), "TOPIC"));
+            client->response("construction : 'TOPIC <#channel> :<topic>' ");
             return false;
         }
         Channel *tmpChan = _srv->getChannelByName(args[1]);
         if (tmpChan == NULL)
         {
-            std::cout << "Channel doesn't exist" << std::endl; // ERR_NOSUCHCHANNEL
+            client->response(ERR_NOSUCHCHANNEL(client->getNickname(), args[1]));
             return false;
         }
         if (!tmpChan->isInChannel(client))
         {
-            std::cout << "You are not in this channel" << std::endl; // ERR_NOTONCHANNEL
+            client->response(ERR_NOTONCHANNEL(client->getNickname(), args[1]));
             return false;
         }
         if (client->isUserOperator(tmpChan) == false && tmpChan->findMode('t') == true)
         {
-            std::cout << "You are not an operator" << std::endl;
+            client->response(ERR_CHANOPRIVSNEEDED(client->getNickname(), args[1]));
             return false;
         }
-        send (client->getFd(), "Topic of channel : ", 18, 0);
-        send (client->getFd(), tmpChan->getChannelName().c_str(), tmpChan->getChannelName().length(), 0);
-        send (client->getFd(), " is \'", 5, 0);
-        send (client->getFd(), tmpChan->getTopic().c_str(), tmpChan->getTopic().length(), 0);
-        send (client->getFd(), "\'\n", 2, 0);
+        std::string msg_set = "Topic of channel : " + tmpChan->getChannelName() + " is \'" + tmpChan->getTopic() + "\'";
+        client->response(msg_set);
         return true;
     }
     else
@@ -73,7 +71,8 @@ bool Topic::execute(User *client, std::vector<std::string> args) {
         }
         else 
         {
-        std::cout << "construction : 'TOPIC <#channel> :<topic>' " << std::endl;
+        client->response(ERR_NEEDMOREPARAMS(client->getNickname(), "TOPIC"));
+        client->response("construction : 'TOPIC <#channel> :<topic>' ");
         return false;
         }
     
@@ -81,42 +80,33 @@ bool Topic::execute(User *client, std::vector<std::string> args) {
     
         if (tmpChan == NULL)
         {
-            std::cout << "Channel doesn't exist" << std::endl; // ERR_NOSUCHCHANNEL
+            client->response(ERR_NOSUCHCHANNEL(client->getNickname(), args[1]));
             return false;
         }
         if (!tmpChan->isInChannel(client))
         {
-            std::cout << "You are not in this channel" << std::endl; // ERR_NOTONCHANNEL
+            client->response(ERR_NOTONCHANNEL(client->getNickname(), args[1]));
             return false;
         }
         if (client->isUserOperator(tmpChan) == false && tmpChan->findMode('t') == true)
         {
-            std::cout << "You are not an operator" << std::endl;
+            client->response(ERR_CHANOPRIVSNEEDED(client->getNickname(), args[1]));
             return false;
         }
         if (args[2] == "")
         {
-            for (std::vector<User *>::iterator iter =
-                 tmpChan->getUsersOfChannel().begin();
-             iter != tmpChan->getUsersOfChannel().end(); iter++) {
-            send ((*iter)->getFd(), "Topic of channel : ", 18, 0);
-            send ((*iter)->getFd(), tmpChan->getChannelName().c_str(), tmpChan->getChannelName().length(), 0);
-            send ((*iter)->getFd(), " as been cleared ", 19, 0);
-            send ((*iter)->getFd(), "\n", 2, 0);
-            tmpChan->setTopic("");}
+            std::string message_cleared = "Topic of channel  \'" + tmpChan->getChannelName() + "\' as been cleared\n";
+            tmpChan->sentMessageToAllMembers(message_cleared);
+            tmpChan->setTopic("");
+            return true;
         }
         else
         {
             tmpChan->setTopic(args[2]);
-            for (std::vector<User *>::iterator iter =
-                 tmpChan->getUsersOfChannel().begin();
-             iter != tmpChan->getUsersOfChannel().end(); iter++) {
-            send ((*iter)->getFd(), "Topic of channel : ", 18, 0);
-            send ((*iter)->getFd(), tmpChan->getChannelName().c_str(), tmpChan->getChannelName().length(), 0);
-            send ((*iter)->getFd(), " is now \'", 10, 0);
-            send ((*iter)->getFd(), tmpChan->getTopic().c_str(), tmpChan->getTopic().length(), 0);
-            send ((*iter)->getFd(), "\'\n", 2, 0);
-            }
+            std::string message_new_topic  = "Topic of channel \'" + tmpChan->getChannelName()
+                    + "\' is now : " + tmpChan->getTopic() + "\n";
+            tmpChan->sentMessageToAllMembers(message_new_topic);
+            return true;
         }
     return true;   
     }

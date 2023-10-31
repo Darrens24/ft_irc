@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/27 09:22:04 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/30 22:15:56 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/31 14:59:29 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,63 +18,99 @@ Kick::Kick(Server *srv) : Command(srv) {}
 
 Kick::~Kick() {}
 
+std::vector<std::string> myOwnSplit_kick(std::string str, std::string sep) {
+  char *cstr = const_cast<char *>(str.c_str());
+  char *current;
+  std::vector<std::string> arr;
+  current = strtok(cstr, sep.c_str());
+  while (current != NULL) {
+    arr.push_back(current);
+    current = strtok(NULL, sep.c_str());
+  }
+  return arr;
+}
+
 bool Kick::execute(User *client, std::vector<std::string> args) {
-  if (args.size() < 4) {
-    std::cout << "Not enough arguments" << std::endl;
+  if (args.size() < 3 || args.size() > 4) {
+    client->response (ERR_NEEDMOREPARAMS(client->getNickname(), "KICK"));
     return false;
   }
-
-  if (args[1][0] == '#' && args[3][0] == ':') {
+  if (args[1][0] == '#') {
     args[1].erase(0, 1);
-    args[3].erase(0, 1);
   } else {
-    std::cout << "construction : 'KICK #channelname username :reason' "
-              << std::endl;
+    client->response(ERR_NOSUCHCHANNEL(client->getNickname(), args[1]));
+    client->response("construction : 'KICK #channelname username [:reason]'");
     return false;
+  }
+  bool reason = false;
+  if (args.size() == 4 && args[3].length() > 0)
+  {
+    if (args[3][0] == ':')
+    {
+      args[3].erase(0, 1);
+      reason = true;
+    }
+    else {
+      client->response(ERR_NEEDMOREPARAMS(client->getNickname(), "KICK"));
+      client->response("construction : 'KICK #channelname username [:reason]'");
+      return false;
+    } 
   }
 
   bool found_user = false;
 
   Channel *tmpChan = _srv->getChannelByName(args[1]);
   if (tmpChan == NULL) {
-    std::cout << "Channel doesn't exist" << std::endl;
+    client->response(ERR_NOSUCHCHANNEL(client->getNickname(), args[1]));
     return false;
   }
-  User *tmpUser = _srv->getUserByNickname(args[2]);
-  if (tmpUser == NULL) {
-    std::cout << "User doesn't exist" << std::endl;
-    return false;
-  }
-  if (!tmpChan->isInChannel(client)) {
-    std::cout << "You are not in this channel" << std::endl;
-    return false;
-  }
-  if (client->isUserOperator(tmpChan) == false) {
-    std::cout << "This user is not an operator" << std::endl;
-    return false;
-  }
-  if (tmpUser->getNickname() == client->getNickname()) {
-    std::cout << "You can't kick yourself" << std::endl;
-    return false;
-  }
-  for (std::vector<User *>::iterator it = tmpChan->getUsersOfChannel().begin();
-       it != tmpChan->getUsersOfChannel().end(); it++) {
-    if ((*it)->getNickname() == args[2]) {
-      std::string msg = "You have been kicked by " + client->getNickname() +
-                        " for " + args[3];
-      (*it)->response(msg);
-      tmpChan->getUsersOfChannel().erase(it);
-      found_user = true;
-      if (tmpChan->getUsersOfChannel().size() == 0) {
-        send(client->getFd(), "channel deleted", 15, 0);
-        _srv->getChannel().erase(tmpChan->getChannelName());
-      }
-      return true;
+
+  std::vector<std::string> users_split = myOwnSplit_kick(args[2], ",");
+  
+  for (std::vector<std::string>::iterator it = users_split.begin(); it != users_split.end(); it++)
+  {
+
+    User *tmpUser = _srv->getUserByNickname(*it);
+    if (tmpUser == NULL) {
+      client->response(ERR_NOSUCHNICK(client->getNickname(), *it));
+      return false;
     }
-  }
-  if (found_user == false) {
-    std::cout << "This user is not in this channel" << std::endl;
-    return false;
+    if (!tmpChan->isInChannel(client)) {
+      client->response(ERR_NOTONCHANNEL(client->getNickname(), args[1]));
+      return false;
+    }
+    if (client->isUserOperator(tmpChan) == false) {
+      client->response(ERR_CHANOPRIVSNEEDED(client->getNickname(), args[1]));
+      return false;
+    }
+    if (tmpUser->getNickname() == client->getNickname()) {
+      client->response("You can't kick yourself");
+      return false;
+    }
+    for (std::vector<User *>::iterator it = tmpChan->getUsersOfChannel().begin();
+        it != tmpChan->getUsersOfChannel().end(); it++) {
+      if ((*it)->getNickname() == tmpUser->getNickname()) {
+        std::string msg = "";
+        if (reason == false)
+          msg = "You have been kicked by " + client->getNickname();
+          
+        else
+        {
+          msg = "You have been kicked by " + client->getNickname() +
+                          " for " + args[3];
+        }
+        (*it)->response(msg);
+        tmpChan->getUsersOfChannel().erase(it);
+        tmpChan->sentMessageToAllMembers( tmpUser->getNickname() + " has been kicked by " +
+                                        client->getNickname());
+        found_user = true;
+        break;
+      }
+    }
+    if (found_user == false) {
+      client->response("user not in channel");
+      return false;
+    }
   }
   return true;
 }

@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 16:20:20 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/30 21:26:03 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/31 10:17:15 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,15 +93,14 @@ bool Channel::findMode(char mode) {
   return false;
 }
 
-// std::vector<User *> &Channel::getOperators()
-// {
-//   for (std::vector<User *>::iterator it = _users.begin(); it != _users.end();
-//        it++) {
-//     if ((*it)->isUserOperator(this))
-//       _operators.push_back(*it);
-//   }
-//   return _operators;
-// }
+void Channel::sentMessageToAllMembers(std::string message)
+{
+  for (std::vector<User *>::iterator it = _users.begin(); it != _users.end();
+       it++) {
+    (*it)->response(message);
+  }
+}
+
 
 void Channel::setOwner(User *u) { _owner = u; }
 

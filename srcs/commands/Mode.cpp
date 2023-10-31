@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/27 19:59:54 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/30 22:20:32 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/31 17:36:21 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,11 +55,15 @@ bool Mode::execute_differents_modes(User *client, std::vector<std::string> args,
                 if (tmpChan->findMode('i') == true)
                 {
                     tmpChan->removeMode('i');
-                    send (client->getFd(), "Channel is no longer invite only\n", 34, 0);
+                    std::string channeli = tmpChan->getChannelName();
+                    std::string modeChangeMessagei = ":" + client->getNickname() + "!~" +
+                                client->getUsername() + "@localhost MODE " + channeli +
+                                " -i";
+                    tmpChan->sentMessageToAllMembers(modeChangeMessagei);
                 }
                 else
                 {
-                    send (client->getFd(),"invite only can't be deleted because fonction is not activated\n", 64, 0);
+                    client->response("invite only can't be deleted because fonction is not activated");
                     return false;
                 }
             }
@@ -73,7 +77,11 @@ bool Mode::execute_differents_modes(User *client, std::vector<std::string> args,
                 else
                 {
                     tmpChan->addMode('i');
-                    send (client->getFd(), "Channel is now invite only\n", 28, 0);
+                    std::string channeli2 = tmpChan->getChannelName();
+                    std::string modeChangeMessagei2 = ":" + client->getNickname() + "!~" +
+                                client->getUsername() + "@localhost MODE " + channeli2 +
+                                " +i";
+                    tmpChan->sentMessageToAllMembers(modeChangeMessagei2);
                 }
             }
         }
@@ -84,7 +92,11 @@ bool Mode::execute_differents_modes(User *client, std::vector<std::string> args,
                 if (tmpChan->findMode('l') == true)
                 {
                     tmpChan->removeMode('l');
-                    send(client->getFd(), "Client Limit Channel Mode desactivated\n", 40, 0);
+                    std::string channel_l = tmpChan->getChannelName();
+                    std::string modeChangeMessage_l = ":" + client->getNickname() + "!~" +
+                                client->getUsername() + "@localhost MODE " + channel_l +
+                                " -l";
+                    tmpChan->sentMessageToAllMembers(modeChangeMessage_l);
                 }
                 else
                 {
@@ -94,6 +106,11 @@ bool Mode::execute_differents_modes(User *client, std::vector<std::string> args,
             }
             else
             {
+                if (args.size() != 4)
+                    {
+                        std::cout << "construction : 'MODE <#channel> <mode> <limit>' " << std::endl;
+                        return false;
+                    }
                 if (tmpChan->findMode('l') == true)
                 {
                     send (client->getFd(), "limit is already set\n", 22, 0);
@@ -101,8 +118,39 @@ bool Mode::execute_differents_modes(User *client, std::vector<std::string> args,
                 }
                 else
                 {
-                    tmpChan->addMode('l');
-                    send (client->getFd(), "topic is now locked\n", 21, 0);
+                    if (args[3].length() > 0)
+                    {
+                        int limit;
+                        try {
+                            limit = std::stoi(args[3]);
+                        }
+                        catch (std::exception &e) {
+                            client->response(ERR_INVALIDKEY(client->getNickname(), tmpChan->getChannelName()));
+                            return false;
+                        }
+                        if (limit < 1)
+                        {
+                            client->response(ERR_INVALIDKEY(client->getNickname(), tmpChan->getChannelName()));
+                            return false;
+                        }
+                        if ((unsigned int)tmpChan->getNumberofUsers() >= (unsigned int)limit)
+                        {
+                            client->response(ERR_CHANNELISFULL(client->getNickname(), tmpChan->getChannelName()));
+                            return false;
+                        }
+                        tmpChan->setLimit(limit);
+                        tmpChan->addMode('l');
+                        std::string channel_l2 = tmpChan->getChannelName();
+                        std::string modeChangeMessage_l2 = ":" + client->getNickname() + "!~" +
+                                    client->getUsername() + "@localhost MODE " + channel_l2 +
+                                    " +l";
+                        tmpChan->sentMessageToAllMembers(modeChangeMessage_l2);
+                    }
+                    else
+                    {
+                        client->response(ERR_NEEDMOREPARAMS(client->getNickname(), args[1]));
+                        return false;
+                    }
                 }
             }
         }
@@ -114,7 +162,11 @@ bool Mode::execute_differents_modes(User *client, std::vector<std::string> args,
                 {
                     tmpChan->removeMode('k');
                     tmpChan->setKey("");
-                    send(client->getFd(), "unset password\n", 16, 0);
+                    std::string channel_k = tmpChan->getChannelName();
+                    std::string modeChangeMessage_k = ":" + client->getNickname() + "!~" +
+                                client->getUsername() + "@localhost MODE " + channel_k +
+                                " -k";
+                    tmpChan->sentMessageToAllMembers(modeChangeMessage_k);
                 }
                 else
                 {
@@ -126,7 +178,8 @@ bool Mode::execute_differents_modes(User *client, std::vector<std::string> args,
             {
                 if (args.size() != 4)
                     {
-                        std::cout << "construction : 'MODE <#channel> <mode> <key>' " << std::endl;
+                        client->response(ERR_NEEDMOREPARAMS(client->getNickname(), args[1]));
+                        client->response("construction : 'MODE <#channel> <mode> <key>' ");
                         return false;
                     }
                 if (tmpChan->findMode('k') == true)
@@ -141,6 +194,11 @@ bool Mode::execute_differents_modes(User *client, std::vector<std::string> args,
                         tmpChan->setKey(args[3]);
                         tmpChan->addMode('k');
                         send (client->getFd(), "set key\n", 9, 0);
+                        std::string channel_k2 = tmpChan->getChannelName();
+                        std::string modeChangeMessage_k2 = ":" + client->getNickname() + "!~" +
+                                    client->getUsername() + "@localhost MODE " + channel_k2 +
+                                    " +k";
+                        tmpChan->sentMessageToAllMembers(modeChangeMessage_k2);
                     }
                     else
                     {
@@ -158,6 +216,11 @@ bool Mode::execute_differents_modes(User *client, std::vector<std::string> args,
                 {
                     tmpChan->removeMode('t');
                     send(client->getFd(), "all users can now change the topic\n", 36, 0);
+                    std::string channel_t = tmpChan->getChannelName();
+                    std::string modeChangeMessage_t = ":" + client->getNickname() + "!~" +
+                                client->getUsername() + "@localhost MODE " + channel_t +
+                                " -t";
+                    tmpChan->sentMessageToAllMembers(modeChangeMessage_t);
                 }
                 else
                 {
@@ -175,42 +238,49 @@ bool Mode::execute_differents_modes(User *client, std::vector<std::string> args,
                 else
                 {
                     tmpChan->addMode('t');
-                    send (client->getFd(), "topic is now locked\n", 21, 0);
+                    std::string channel_t2 = tmpChan->getChannelName();
+                    std::string modeChangeMessage_t2 = ":" + client->getNickname() + "!~" +
+                                client->getUsername() + "@localhost MODE " + channel_t2 +
+                                " +t";
+                    tmpChan->sentMessageToAllMembers(modeChangeMessage_t2);
                 }
             }
         }
-        if (args[2][0] == 'o')
+        else if (args[2][0] == 'o')
         {
-            /*Users with this mode may perform channel moderation tasks such as kicking users,
-             applying channel modes, and set other users to operator (or lower) status.*/
             if (args.size() != 4 || args[3].length() == 0)
             {
-                std::cout << "construction : 'MODE <#channel> [+/-]o <target>' " << std::endl;
+                client->response(ERR_NEEDMOREPARAMS(client->getNickname(), args[1]));
+                client->response("construction : 'MODE <#channel> [+/-]o <target>' ");
                 return false;
             }
             User *tmpUser = _srv->getUserByNickname(args[3]);
             if (tmpUser == NULL)
             {
-                std::cout << "User doesn't exist" << std::endl;
+                client->response(ERR_NOSUCHNICK(client->getNickname(), args[3]));
                 return false;
             }
-            Channel *tmpChan = _srv->getChannelByName(args[1]);
-            if (tmpChan == NULL)
+            Channel *FaketmpChan = _srv->getChannelByName(args[1]);
+            if (FaketmpChan == NULL)
             {
-                std::cout << "Channel doesn't exist" << std::endl; // ERR_NOSUCHCHANNEL
+                client->response(ERR_NOSUCHCHANNEL(client->getNickname(), args[1]));
                 return false;
             }
-            if (!tmpChan->isInChannel(tmpUser))
+            if (!FaketmpChan->isInChannel(tmpUser))
             {
-                std::cout << "User is not in this channel" << std::endl; // ERR_NOTONCHANNEL
+                client->response(ERR_NOTONCHANNEL(client->getNickname(), args[1]));
                 return false;
             }
             if (diff_mode == false)
             {
-                if (tmpUser->isUserOperator(tmpChan))
+                if (tmpUser->isUserOperator(FaketmpChan))
                 {
-                    tmpUser->removeChannelWhereUserIsOperator(tmpChan);
-                    send(client->getFd(), "user is no longer operator\n", 28, 0);
+                    tmpUser->removeChannelWhereUserIsOperator(FaketmpChan);
+                    std::string channel_o = tmpChan->getChannelName();
+                    std::string modeChangeMessage_o = ":" + client->getNickname() + "!~" +
+                                client->getUsername() + "@localhost MODE " + channel_o +
+                                " -o " + tmpUser->getNickname();
+                    tmpChan->sentMessageToAllMembers(modeChangeMessage_o);
                 }
                 else
                 {
@@ -220,17 +290,26 @@ bool Mode::execute_differents_modes(User *client, std::vector<std::string> args,
             }
             else
             {
-                if (tmpUser->isUserOperator(tmpChan))
+                if (tmpUser->isUserOperator(FaketmpChan))
                 {
                     send (client->getFd(), "user is already operator\n", 25, 0);
                     return false;
                 }
                 else
                 {
-                    tmpUser->addChannelWhereUserIsOperator(tmpChan);
-                    send (client->getFd(), "user is now operator\n", 21, 0);
+                    tmpUser->addChannelWhereUserIsOperator(FaketmpChan);
+                    std::string channel_o2 = tmpChan->getChannelName();
+                    std::string modeChangeMessage_o2 = ":" + client->getNickname() + "!~" +
+                                client->getUsername() + "@localhost MODE " + channel_o2 +
+                                " +o " + tmpUser->getNickname();
+                    tmpChan->sentMessageToAllMembers(modeChangeMessage_o2);
                 }
             }
+        }
+        else
+        {
+            client->response(ERR_UNKNOWNMODE(client->getNickname(), args[2][0]));
+            return false;
         }
         
     args[2].erase(0, 1);
@@ -242,7 +321,7 @@ bool Mode::execute(User *client, std::vector<std::string> args)
 {
     if (args.size() < 2)
     {
-        std::cout << "wrong arguments" << std::endl; //ERR
+        client->response(ERR_NEEDMOREPARAMS(client->getNickname(), "MODE"));
         return false;
     }
     if (args[1][0] == '#')
@@ -251,37 +330,29 @@ bool Mode::execute(User *client, std::vector<std::string> args)
     }
     else
     {
-        std::cout << "construction : 'MODE <#channel> <mode>' " << std::endl;
+        client->response(ERR_NOSUCHCHANNEL(client->getNickname(), args[1]));
+        client->response("construction : 'MODE <#channel> <mode>' ");
         return false;
     }
     Channel *tmpChan = _srv->getChannelByName(args[1]);
     if (tmpChan == NULL)
     {
-        std::cout << "Channel doesn't exist" << std::endl; // ERR_NOSUCHCHANNEL
+        client->response(ERR_NOSUCHCHANNEL(client->getNickname(), args[1]));
         return false;
     }
     if (!tmpChan->isInChannel(client))
     {
-        std::cout << "You are not in this channel" << std::endl; // ERR_NOTONCHANNEL
+        client->response(ERR_NOTONCHANNEL(client->getNickname(), args[1]));
         return false;
     }
     if (client->isUserOperator(tmpChan) == false)
     {
-        std::cout << "You are not an operator" << std::endl;
+        client->response(ERR_CHANOPRIVSNEEDED(client->getNickname(), args[1]));
         return false;
     }
     if (args.size() == 2)
     {
-        send(client->getFd(), "Modes of channel : ", 20, 0);
-        send(client->getFd(), tmpChan->getChannelName().c_str(), tmpChan->getChannelName().length(), 0);
-        send(client->getFd(), " -> ", 5, 0);
-        std::cout << tmpChan->getChannelName().length() << std::endl;
-        if (tmpChan->getModeString().length() > 0)
-            send(client->getFd(), tmpChan->getModeString().c_str(), tmpChan->getModeString().length(), 0);
-        else
-            send(client->getFd(), "empty , you can add one with 'MODE <#channel> <new_mode>'", 58, 0);
-        send(client->getFd(), "\n", 2, 0);
-        return true;
+        client->response(RPL_CHANNELMODEIS(client->getNickname(), tmpChan->getChannelName(), tmpChan->getModeString()));
     }
     if (args.size() > 2)
     {
