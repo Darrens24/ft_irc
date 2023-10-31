@@ -6,11 +6,11 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 14:57:54 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/29 23:04:51 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/30 19:45:50 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Server.hpp"
+#include "../headers/Server.hpp"
 #include <sys/types.h>
 
 std::vector<std::string> mySplit(std::string str, std::string sep) {
@@ -69,7 +69,15 @@ Server::Server(int port, std::string password)
             << std::endl;
 }
 
-Server::~Server() {}
+Server::~Server() {
+  while (!this->_polls.empty()) {
+    this->_polls.pop_back();
+  }
+  while (!this->_users.empty()) {
+    delete this->_users.begin()->second;
+    this->_users.erase(this->_users.begin());
+  }
+}
 
 Server::Server(const Server &cpy)
     : _serverName(cpy._serverName), _password(cpy._password),
@@ -97,9 +105,9 @@ void Server::start() {
   this->_polls.push_back(serverPoll);
   std::cout << MAG SERVERSPEAK YEL ": Poll server created" NC << std::endl;
 
-  while (1) {
+  while (server_up) {
     int pollCount = poll(&this->_polls[0], this->_polls.size(), -1);
-    if (pollCount < 0) {
+    if (pollCount < 0 && server_up) {
       std::cout << RED "Poll failed" NC << std::endl;
       exit(EXIT_FAILURE);
     }
@@ -109,6 +117,9 @@ void Server::start() {
         std::cout << RED CLIENTSPEAK << " " << this->_polls[i].fd
                   << ": disconnected" NC << std::endl;
         close(this->_polls[i].fd);
+        this->_users[this->_polls[i].fd]->setUserUnregistered();
+        this->_users[this->_polls[i].fd]->setNickUnregistered();
+        delete this->_users[this->_polls[i].fd];
         this->_users.erase(this->_polls[i].fd);
         this->_polls.erase(this->_polls.begin() + i);
         break;
@@ -144,7 +155,9 @@ void Server::readFromClient(int fd, int i) {
     this->_polls.erase(this->_polls.begin() + i);
     return;
   }
-  if (this->_users[fd]->getUserRegistered() == false)
+  if (this->_users[fd]->getUserRegistered() == false ||
+      this->_users[fd]->getRegistered() == false ||
+      this->_users[fd]->getNickname() == "")
     getBasicInfo(fd, buffer);
   else
     launchParser(buffer, fd);
@@ -152,6 +165,7 @@ void Server::readFromClient(int fd, int i) {
 
 bool Server::getBasicInfo(int fd, char buffer[1024]) {
 
+  std::cout << "we BASIC INFO" << std::endl;
   std::string str(buffer);
   std::vector<std::string> array = mySplit(str, "\r\n\t\v ");
 
@@ -160,7 +174,8 @@ bool Server::getBasicInfo(int fd, char buffer[1024]) {
   }
   if (array[0] == "CAP") {
     array.erase(array.begin());
-    array.erase(array.begin());
+    if (array.size() > 0)
+      array.erase(array.begin());
   }
   if (array[0] == "PASS") {
     Pass pass(this);
@@ -194,35 +209,16 @@ bool Server::getBasicInfo(int fd, char buffer[1024]) {
       this->_users[fd]->response(RED "You need to set password first" NC);
     }
   }
-  if (!this->_users[fd]->getNickname().empty() &&
+  if (this->_users[fd]->getNickRegistered() == true &&
       this->_users[fd]->getUserRegistered() == true &&
       this->_users[fd]->getRegistered() == true) {
+        std ::cout << "we are in" << std::endl;
     this->_users[fd]->response("CAP * LS :multi-prefix sasl");
     std::string welcomeMssg = "001 " + this->_users[fd]->getNickname() +
-                              " :Welcome to the Internet Relay Network bitch";
+                              " :Welcome to the Internet Relay Network";
     this->_users[fd]->response(welcomeMssg);
   }
   return true;
-}
-
-bool Server::isNicknameAvailable(std::string username) {
-  for (std::map<int, User *>::iterator it = _users.begin(); it != _users.end();
-       ++it) {
-    if (it->second->getNickname() == username)
-      return false;
-  }
-  return true;
-}
-
-std::vector<User *> Server::getUsersOnly() {
-  std::vector<User *> usersOnly;
-
-  for (std::map<int, User *>::iterator it = _users.begin(); it != _users.end();
-       ++it) {
-    usersOnly.push_back(it->second);
-  }
-
-  return usersOnly;
 }
 
 void Server::launchParser(char buffer[1024], int fd) {
@@ -230,6 +226,38 @@ void Server::launchParser(char buffer[1024], int fd) {
   (void)fd;
   std::vector<std::string> array = mySplit(str, "\r\n\t\v ");
 
+  if (array[0] == "PASS") {
+    Pass pass(this);
+    if (!pass.execute(this->_users[fd], array)) {
+      return;
+    }
+    // array.erase(array.begin());
+    // array.erase(array.begin());
+  }
+  if (array[0] == "NICK") {
+    if (this->_users[fd]->getRegistered() == true) {
+      Nick nick(this);
+      if (!nick.execute(this->_users[fd], array)) {
+        return;
+      }
+      // array.erase(array.begin());
+      // array.erase(array.begin());
+    } else {
+      this->_users[fd]->response(RED "You need to set password first" NC);
+    }
+  }
+  if (array[0] == "USER") {
+    if (this->_users[fd]->getRegistered() == true) {
+      Usercmd user(this);
+      if (!user.execute(this->_users[fd], array)) {
+        return;
+      }
+      // array.erase(array.begin());
+      // array.erase(array.begin());
+    } else {
+      this->_users[fd]->response(RED "You need to set password first" NC);
+    }
+  }
   if (array[0] == "JOIN") {
     Join join(this);
     join.execute(this->_users[fd], array);
@@ -290,6 +318,8 @@ void Server::acceptNewClient() {
   this->_users.insert(std::make_pair(fd, newUser));
 }
 
+/***\ channels \***/
+
 int Server::createChannel(std::string channelName, User *u) {
   Channel *newChannel = new Channel(channelName);
   _channels.insert(std::make_pair(channelName, newChannel));
@@ -328,4 +358,24 @@ User *Server::getUserByNickname(std::string nickname) {
     }
   }
   return NULL;
+}
+
+bool Server::isNicknameAvailable(std::string username) {
+  for (std::map<int, User *>::iterator it = _users.begin(); it != _users.end();
+       ++it) {
+    if (it->second->getNickname() == username)
+      return false;
+  }
+  return true;
+}
+
+std::vector<User *> Server::getUsersOnly() {
+  std::vector<User *> usersOnly;
+
+  for (std::map<int, User *>::iterator it = _users.begin(); it != _users.end();
+       ++it) {
+    usersOnly.push_back(it->second);
+  }
+
+  return usersOnly;
 }

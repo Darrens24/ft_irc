@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/27 19:59:54 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/30 16:07:50 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/30 22:20:32 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,36 +77,36 @@ bool Mode::execute_differents_modes(User *client, std::vector<std::string> args,
                 }
             }
         }
-        if (args[2][0] == 't')
+        else if (args[2][0] == 'l')
         {
             if (diff_mode == false)
             {
-                if (tmpChan->findMode('t') == true)
+                if (tmpChan->findMode('l') == true)
                 {
-                    tmpChan->removeMode('t');
-                    send(client->getFd(), "all users can now change the topic\n", 36, 0);
+                    tmpChan->removeMode('l');
+                    send(client->getFd(), "Client Limit Channel Mode desactivated\n", 40, 0);
                 }
                 else
                 {
-                    send (client->getFd(),"topic can't be deleted because fonction is not activated\n", 59, 0);
+                    send (client->getFd(),"limit can't be deleted because fonction is not activated\n", 58, 0);
                     return false;
                 }
             }
             else
             {
-                if (tmpChan->findMode('t') == true)
+                if (tmpChan->findMode('l') == true)
                 {
-                    send (client->getFd(), "topic is already locked\n", 25, 0);
+                    send (client->getFd(), "limit is already set\n", 22, 0);
                     return false;
                 }
                 else
                 {
-                    tmpChan->addMode('t');
+                    tmpChan->addMode('l');
                     send (client->getFd(), "topic is now locked\n", 21, 0);
                 }
             }
         }
-        if (args[2][0] == 'k')
+        else if (args[2][0] == 'k')
         {
             if (diff_mode == false)
             {
@@ -150,6 +150,35 @@ bool Mode::execute_differents_modes(User *client, std::vector<std::string> args,
                 }
             }
         }
+        else if (args[2][0] == 't')
+        {
+            if (diff_mode == false)
+            {
+                if (tmpChan->findMode('t') == true)
+                {
+                    tmpChan->removeMode('t');
+                    send(client->getFd(), "all users can now change the topic\n", 36, 0);
+                }
+                else
+                {
+                    send (client->getFd(),"topic can't be deleted because fonction is not activated\n", 59, 0);
+                    return false;
+                }
+            }
+            else
+            {
+                if (tmpChan->findMode('t') == true)
+                {
+                    send (client->getFd(), "topic is already locked\n", 25, 0);
+                    return false;
+                }
+                else
+                {
+                    tmpChan->addMode('t');
+                    send (client->getFd(), "topic is now locked\n", 21, 0);
+                }
+            }
+        }
         if (args[2][0] == 'o')
         {
             /*Users with this mode may perform channel moderation tasks such as kicking users,
@@ -171,30 +200,35 @@ bool Mode::execute_differents_modes(User *client, std::vector<std::string> args,
                 std::cout << "Channel doesn't exist" << std::endl; // ERR_NOSUCHCHANNEL
                 return false;
             }
+            if (!tmpChan->isInChannel(tmpUser))
+            {
+                std::cout << "User is not in this channel" << std::endl; // ERR_NOTONCHANNEL
+                return false;
+            }
             if (diff_mode == false)
             {
                 if (tmpUser->isUserOperator(tmpChan))
                 {
                     tmpUser->removeChannelWhereUserIsOperator(tmpChan);
-                    send(client->getFd(), "all users can now change the topic\n", 36, 0);
+                    send(client->getFd(), "user is no longer operator\n", 28, 0);
                 }
                 else
                 {
-                    send (client->getFd(),"topic can't be deleted because fonction is not activated\n", 59, 0);
+                    send (client->getFd(),"user is not operator\n", 21, 0);
                     return false;
                 }
             }
             else
             {
-                if (tmpChan->findMode('o') == true)
+                if (tmpUser->isUserOperator(tmpChan))
                 {
-                    send (client->getFd(), "topic is already locked\n", 25, 0);
+                    send (client->getFd(), "user is already operator\n", 25, 0);
                     return false;
                 }
                 else
                 {
-                    tmpChan->addMode('o');
-                    send (client->getFd(), "topic is now locked\n", 21, 0);
+                    tmpUser->addChannelWhereUserIsOperator(tmpChan);
+                    send (client->getFd(), "user is now operator\n", 21, 0);
                 }
             }
         }
@@ -229,6 +263,11 @@ bool Mode::execute(User *client, std::vector<std::string> args)
     if (!tmpChan->isInChannel(client))
     {
         std::cout << "You are not in this channel" << std::endl; // ERR_NOTONCHANNEL
+        return false;
+    }
+    if (client->isUserOperator(tmpChan) == false)
+    {
+        std::cout << "You are not an operator" << std::endl;
         return false;
     }
     if (args.size() == 2)

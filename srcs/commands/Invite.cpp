@@ -6,11 +6,11 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/27 15:47:52 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/27 18:50:04 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/30 21:38:51 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Command.hpp"
+#include "../../headers/Command.hpp"
 
 Invite::Invite(Server *srv) : Command(srv) {}
 
@@ -43,12 +43,10 @@ bool Invite::execute(User *client, std::vector<std::string> args) {
     std::cout << "You are not in this channel" << std::endl; // ERR_NOTONCHANNEL
     return false;
   }
-  // if (tmpChan->getOwner()->getNickname() != client->getNickname() &&
-  // tmpChan->getMode() != "o")
-  // {
-  //     std::cout << "You are not the owner of this channel" << std::endl;
-  //     return;
-  // }
+  if (client->isUserOperator(tmpChan) == false && tmpChan->findMode('i') == true)  {
+    std::cout << "You are not an operator" << std::endl;
+    return false;
+  }
   if (tmpChan->isInChannel(tmpUser)) // ERR_USERONCHANNEL
   {
     std::cout << "User is already in this channel" << std::endl;
@@ -59,11 +57,11 @@ bool Invite::execute(User *client, std::vector<std::string> args) {
   send(tmpUser->getFd(), "You have been invited to join channel : ", 41, 0);
   send(tmpUser->getFd(), tmpChan->getChannelName().c_str(),
        tmpChan->getChannelName().length(), 0);
-  send(tmpUser->getFd(), "\n", 2, 0);
-  send (tmpUser->getFd(), "If you want copy : JOIN #", 26, 0);
-  send (tmpUser->getFd(), tmpChan->getChannelName().c_str(),
-         tmpChan->getChannelName().length(), 0);
-  send(tmpUser->getFd(), "\n", 2, 0);
+  send(tmpUser->getFd(), "\r\n", 2, 0);
+  send(tmpUser->getFd(), "If you want copy : JOIN #", 26, 0);
+  send(tmpUser->getFd(), tmpChan->getChannelName().c_str(),
+       tmpChan->getChannelName().length(), 0);
+  send(tmpUser->getFd(), "\r\n", 2, 0);
 
   return true;
 }

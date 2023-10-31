@@ -34,9 +34,9 @@ SRCS = 	$(SRC_DIR)/main.cpp \
 				 	${SRC_DIR}/commands/Invite.cpp \
 				 	${SRC_DIR}/commands/Kick.cpp \
 				 	${SRC_DIR}/commands/Privmsg.cpp \
-					${SRC_DIR}/commands/Topic.cpp \
-					${SRC_DIR}/commands/Mode.cpp 
-			
+				 	${SRC_DIR}/commands/Topic.cpp \
+				 	${SRC_DIR}/commands/Mode.cpp \
+
 OBJS = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
 
 all: $(NAME)

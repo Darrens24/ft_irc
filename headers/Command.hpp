@@ -24,14 +24,34 @@
 #define ERR_BADCHANNELKEY(client1, channel1)                                   \
   "475 " + client1 + " " + channel1 +                                          \
       " :" RED "Error" WHT ": Cannot join channel (+k)" NC
-  
+
+#define ERR_CHANNELISFULL(client1, channel1)                                   \
+  "471 " + client1 + " " + channel1 + " :" WHT "Channel is full" NC
+
+#define RPL_NAMREPLY(client1, symbol1, channel1, nick1)                        \
+  "353 " + client1 + " " + symbol1 + " " + channel1 + " :" + nick1
+
+#define RPL_ENDOFNAMES(client1, channel1)                                      \
+  "366 " + client1 + " " + channel1 + " :" WHT "End of /NAMES list" NC
+
+#define RPL_TOPIC(client1, channel1)                                           \
+  "332 " + client1 + " " + channel1 + " :" WHT "topics" NC
+
+#define ERR_NOSUCHCHANNEL(client1, channel1)                                   \
+  "403 " + client1 + " " + channel1 + " :" WHT "No such channel" NC
+
 #define ERR_INVITEONLYCHAN(client1, channel1)                                  \
-  "473 " + client1 + " " + channel1 +                                          \
-      " :" RED "Error" WHT ": Cannot join channel (+i)" NC
-    
+  "473 " + client1 + " " + channel1 + " :" WHT "This channel is invite only" NC
+
+#define ERR_BADCHANMASK(client1, channel1)                                     \
+  "476 " + client1 + " " + channel1 + " :" WHT "Incorrect format" NC
+
+#define ERR_NOSUCHNICK(client1, channel1)                                      \
+  "401 " + client1 + " " + channel1 + " :" WHT "No such nick" NC
+
 #define ERR_INVALIDKEY(client1, channel1)                                      \
   "525 " + client1 + " " + channel1 +                                          \
-      " :" RED "Error" WHT ": Cannot join channel (+k)" NC 
+      " :" RED "Error" WHT ": Cannot join channel (+k)" NC
 
 #include "Server.hpp"
 #include <numeric>
@@ -124,6 +144,6 @@ public:
   ~Mode();
 
   bool execute(User *client, std::vector<std::string> args);
-  bool execute_differents_modes(User *client, std::vector<std::string> args,  Channel *tmpChan);
-
+  bool execute_differents_modes(User *client, std::vector<std::string> args,
+                                Channel *tmpChan);
 };

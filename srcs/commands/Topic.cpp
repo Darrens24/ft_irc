@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/27 19:03:52 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/30 13:08:01 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/30 21:36:55 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,11 @@ bool Topic::execute(User *client, std::vector<std::string> args) {
             std::cout << "You are not in this channel" << std::endl; // ERR_NOTONCHANNEL
             return false;
         }
+        if (client->isUserOperator(tmpChan) == false && tmpChan->findMode('t') == true)
+        {
+            std::cout << "You are not an operator" << std::endl;
+            return false;
+        }
         send (client->getFd(), "Topic of channel : ", 18, 0);
         send (client->getFd(), tmpChan->getChannelName().c_str(), tmpChan->getChannelName().length(), 0);
         send (client->getFd(), " is \'", 5, 0);
@@ -84,9 +89,9 @@ bool Topic::execute(User *client, std::vector<std::string> args) {
             std::cout << "You are not in this channel" << std::endl; // ERR_NOTONCHANNEL
             return false;
         }
-        if (tmpChan->getOwner()->getNickname() != client->getNickname() && tmpChan->findMode('t') == true)
+        if (client->isUserOperator(tmpChan) == false && tmpChan->findMode('t') == true)
         {
-            std::cout << "You are not the owner of this channel" << std::endl;
+            std::cout << "You are not an operator" << std::endl;
             return false;
         }
         if (args[2] == "")

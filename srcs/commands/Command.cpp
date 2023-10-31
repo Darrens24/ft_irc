@@ -6,12 +6,12 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/26 10:43:37 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/27 19:03:28 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/27 16:29:03 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Command.hpp"
-#include "Server.hpp"
+#include "../../headers/Command.hpp"
+#include "../../headers/Server.hpp"
 
 Command::Command(Server *srv) : _srv(srv) {}
 
@@ -76,6 +76,7 @@ bool Nick::execute(User *client, std::vector<std::string> args) {
   }
 
   client->setNickname(args[1]);
+  client->setNickRegistered();
   std::string login =
       GRN "<" + client->getNickname() + "> " W ":Nickname has been set" NC;
   client->response(login);

@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 12:44:53 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/30 15:51:06 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/30 22:21:40 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,8 @@ private:
   std::string key;
   std::string _topic;
   std::vector<char> _mode;
+  unsigned int _limit;
+  //std::vector<User *> _operators;
 
 public:
   // canonical form
@@ -45,17 +47,23 @@ public:
   // methodes
   int addUser(User *u);
   int isInChannel(User *u);
-  bool removeMode(char mode); // return true if mode is removed, false if mode is not found
-  bool addMode(char mode); // return true if mode is added, false if mode is already set
+  void responseALL(std::string response);
+  void responseALLnotMe(std::string response, std::string nick);
+  bool removeMode(
+      char mode); // return true if mode is removed, false if mode is not found
+  bool addMode(
+      char mode); // return true if mode is added, false if mode is already set
   bool findMode(char mode);
-
+  //std::vector<User *> &getOperators();
   std::string getModeString();
-  
+
   // setters
   void setOwner(User *u);
   void setKey(std::string key);
   void setTopic(std::string topic) { _topic = topic; };
-  void setMode(char mode) { _mode.push_back(mode);};
+  void setMode(char mode) { _mode.push_back(mode); };
+  void setLimit(unsigned int limit) { _limit = limit; };
+
   // getters
   User *getOwner();
   std::string getChannelName();
@@ -63,4 +71,5 @@ public:
   std::string getKey();
   std::string getTopic() { return _topic; };
   std::vector<char> getMode() { return _mode; };
+  unsigned int getLimit() { return _limit; };
 };

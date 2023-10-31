@@ -12,6 +12,8 @@
 
 #pragma once
 
+extern bool server_up;
+
 #include "Channel.hpp"
 #include "Command.hpp"
 #include "User.hpp"
@@ -59,11 +61,13 @@ public:
 
   // getters
   std::vector<User *> getUsersOnly();
+  Channel *getChannelByName(std::string name);
+  User *getUserByNickname(std::string nickname);
 
   // bools
   bool isNicknameAvailable(std::string nickname);
 
-  // methodes
+  // init
   void start();
   void acceptNewClient();
   bool getBasicInfo(int fd, char buffer[1024]);
@@ -72,9 +76,8 @@ public:
 
   int initChecker(int fd);
   void askUserData(int fd);
-  Channel *getChannelByName(std::string name);
-  User *getUserByNickname(std::string nickname);
 
+  // channels
   int createChannel(std::string name, User *u);
   int joinChannel(std::string name, User *u);
   std::string sendMsgToChannel(std::string target, std::string msg, User *u);
