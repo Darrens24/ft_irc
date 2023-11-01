@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 14:57:54 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/27 16:49:54 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/30 19:45:50 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -234,6 +234,7 @@ bool Server::getBasicInfo(int fd, std::string str) {
   if (this->_users[fd]->getNickRegistered() == true &&
       this->_users[fd]->getUserRegistered() == true &&
       this->_users[fd]->getRegistered() == true) {
+    std ::cout << "we are in" << std::endl;
     this->_users[fd]->response("CAP * LS :multi-prefix sasl");
     std::string welcomeMssg = "001 " + this->_users[fd]->getNickname() +
                               " :Welcome to our Internet Relay Network!";

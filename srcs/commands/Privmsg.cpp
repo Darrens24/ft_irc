@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/26 11:02:02 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/27 09:18:09 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/31 12:38:40 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,23 +16,37 @@ Privmsg::Privmsg(Server *srv) : Command(srv) {}
 
 Privmsg::~Privmsg() {}
 
-void Privmsg::SendPrivateMessage(User *client, std::vector<std::string> args) {
+/// PRIVMSG Bob,Charlie,#example_channel :Hello!
+
+std::vector<std::string> myOwnSplit_msg(std::string str, std::string sep) {
+  char *cstr = const_cast<char *>(str.c_str());
+  char *current;
+  std::vector<std::string> arr;
+  current = strtok(cstr, sep.c_str());
+  while (current != NULL) {
+    arr.push_back(current);
+    current = strtok(NULL, sep.c_str());
+  }
+  return arr;
+}
+
+void Privmsg::SendPrivateMessage(User *client, std::string target,
+                                 std::vector<std::string> args) {
   std::vector<User *> allUsers = _srv->getUsersOnly();
   for (std::vector<User *>::iterator it = allUsers.begin();
        it != allUsers.end(); it++) {
-    if ((*it)->getNickname() == args[1]) {
+    if ((*it)->getNickname() == target) {
       std::string msg;
       for (long unsigned int i = 2; i < args.size(); i++)
         msg += args[i] + " ";
-      msg = msg.substr(0, msg.size() - 1);
-      std::string message = ":" + client->getNickname() + "!" +
-                            client->getUsername() + "@:127.0.0.1 PRIVMSG " +
+      std::string message = ":" + client->getNickname() + "!~" +
+                            client->getNickname() + "@localhost PRIVMSG " +
                             (*it)->getNickname() + " " + msg;
       (*it)->response(message);
       return;
     }
   }
-  client->response(ERR_NOSUCHNICK(client->getNickname(), args[1]));
+  client->response(ERR_NOSUCHNICK(client->getNickname(), target));
   return;
 }
 
@@ -41,33 +55,51 @@ bool Privmsg::execute(User *client, std::vector<std::string> args) {
     client->response(ERR_NEEDMOREPARAMS(client->getNickname(), "PRIVMSG"));
     return false;
   }
-
-  if (args[1][0] == '#') {
-    args[1].erase(0, 1);
-    for (std::map<std::string, Channel *>::iterator it =
-             _srv->getChannel().begin();
-         it != _srv->getChannel().end(); it++) {
-      if (it->first == args[1]) {
-        if (!it->second->isInChannel(client)) {
-          client->response("You are not in this channel");
-          return false;
-        }
-
-        std::string msg;
-        std::string channel = "#" + it->second->getChannelName();
-
-        for (long unsigned int i = 2; i < args.size(); i++)
-          msg += args[i] + " ";
-        std::string message =
-            ":" + client->getNickname() + " PRIVMSG " + channel + " " + msg;
-        it->second->responseALLnotMe(message, client->getNickname());
-      } else {
-        client->response(ERR_NOSUCHCHANNEL(client->getNickname(), args[1]));
+  std::vector<std::string> all_targets = myOwnSplit_msg(args[1], ",");
+  if (all_targets.size() == 0) {
+    client->response(ERR_NORECIPIENT(client->getNickname(), "PRIVMSG"));
+    return false;
+  }
+  for (std::vector<std::string>::iterator it = all_targets.begin();
+       it != all_targets.end(); it++) {
+    if (it->length() == 0) {
+      client->response(ERR_NORECIPIENT(client->getNickname(), "PRIVMSG"));
+      return false;
+    } else {
+      if (execute_msg(client, *it, args) == false)
         return false;
-      }
     }
+  }
+  return true;
+}
+
+bool Privmsg::execute_msg(User *client, std::string target,
+                          std::vector<std::string> args) {
+  if (target[0] == '#') {
+    target.erase(0, 1);
+
+    Channel *tmpChan = _srv->getChannelByName(target);
+    if (tmpChan == NULL) {
+      client->response(ERR_NOSUCHCHANNEL(client->getNickname(), target));
+      return false;
+    }
+    if (!tmpChan->isInChannel(client)) {
+      client->response(ERR_NOTONCHANNEL(client->getNickname(), target));
+      return false;
+    }
+    std::string msg;
+    std::string channel = "#" + tmpChan->getChannelName();
+
+    for (long unsigned int i = 2; i < args.size(); i++) {
+      msg += args[i] + " ";
+    }
+    std::string message =
+        ":" + client->getNickname() + " PRIVMSG " + channel + " " + msg;
+    std::cout << message << std::endl;
+    tmpChan->responseALLnotMe(message, client->getNickname());
+
   } else {
-    SendPrivateMessage(client, args);
+    SendPrivateMessage(client, target, args);
   }
   return true;
 }

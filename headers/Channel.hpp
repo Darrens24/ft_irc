@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 12:44:53 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/27 12:25:27 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/31 13:54:03 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ private:
   std::string key;
   std::string _topic;
   std::vector<char> _mode;
+  unsigned int _limit;
 
 public:
   // constructors
@@ -49,6 +50,7 @@ public:
 
   void responseALL(std::string response);
   void responseALLnotMe(std::string response, std::string nick);
+  void sentMessageToAllMembers(std::string message);
 
   bool removeMode(char mode);
   bool addMode(char mode);
@@ -60,6 +62,7 @@ public:
   void setKey(std::string key);
   void setTopic(std::string topic) { _topic = topic; };
   void setMode(char mode) { _mode.push_back(mode); };
+  void setLimit(unsigned int limit) { _limit = limit; };
 
   // getters
   User *getOwner() { return _owner; }
@@ -68,4 +71,6 @@ public:
   std::string getKey() { return key; };
   std::string getTopic() { return _topic; };
   std::vector<char> getMode() { return _mode; };
+  unsigned int getLimit() { return _limit; };
+  unsigned int getNumberofUsers() { return _users.size(); };
 };

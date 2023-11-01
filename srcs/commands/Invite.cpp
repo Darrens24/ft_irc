@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Invite.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/10/27 15:47:52 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/27 16:55:48 by feliciencat      ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../../headers/Command.hpp"
 
 Invite::Invite(Server *srv) : Command(srv) {}
@@ -20,50 +8,48 @@ Invite::~Invite() {}
 
 bool Invite::execute(User *client, std::vector<std::string> args) {
   if (args.size() < 3) {
-    std::cout << "Not enough arguments" << std::endl;
+    client->response(ERR_NEEDMOREPARAMS(client->getNickname(), "INVITE"));
     return false;
   }
   if (args[2][0] == '#') {
     args[2].erase(0, 1);
   } else {
-    std::cout << "construction : 'INVITE #channelname username' " << std::endl;
+    client->response(ERR_NOSUCHCHANNEL(client->getNickname(), args[2]));
+    client->response("construction : 'INVITE <nickname> <#channel>'");
     return false;
   }
   Channel *tmpChan = _srv->getChannelByName(args[2]);
   User *tmpUser = _srv->getUserByNickname(args[1]);
   if (tmpChan == NULL) {
-    std::cout << "Channel doesn't exist" << std::endl; // ERR_NOSUCHCHANNEL
+    client->response(ERR_NOSUCHCHANNEL(client->getNickname(), args[2]));
     return false;
   }
   if (tmpUser == NULL) {
-    std::cout << "User doesn't exist" << std::endl; // ??
+    client->response(ERR_NOSUCHNICK(client->getNickname(), args[1]));
     return false;
   }
   if (!tmpChan->isInChannel(client)) {
-    std::cout << "You are not in this channel" << std::endl; // ERR_NOTONCHANNEL
+    client->response(ERR_NOTONCHANNEL(client->getNickname(), args[2]));
     return false;
   }
-  // if (tmpChan->getOwner()->getNickname() != client->getNickname() &&
-  // tmpChan->getMode() != "o")
-  // {
-  //     std::cout << "You are not the owner of this channel" << std::endl;
-  //     return;
-  // }
-  if (tmpChan->isInChannel(tmpUser)) // ERR_USERONCHANNEL
-  {
-    std::cout << "User is already in this channel" << std::endl;
+  if (client->isUserOperator(tmpChan) == false &&
+      tmpChan->findMode('i') == true) {
+    client->response(ERR_CHANOPRIVSNEEDED(client->getNickname(), args[2]));
     return false;
   }
-
+  if (tmpChan->isInChannel(tmpUser)) {
+    client->response(
+        ERR_USERONCHANNEL(client->getNickname(), args[1], args[2]));
+    return false;
+  }
   tmpUser->setChannelInvited(tmpChan);
-  send(tmpUser->getFd(), "You have been invited to join channel : ", 41, 0);
-  send(tmpUser->getFd(), tmpChan->getChannelName().c_str(),
-       tmpChan->getChannelName().length(), 0);
-  send(tmpUser->getFd(), "\r\n", 2, 0);
-  send(tmpUser->getFd(), "If you want copy : JOIN #", 26, 0);
-  send(tmpUser->getFd(), tmpChan->getChannelName().c_str(),
-       tmpChan->getChannelName().length(), 0);
-  send(tmpUser->getFd(), "\r\n", 2, 0);
+  client->response(RPL_INVITING(client->getNickname(), args[1], args[2]));
+
+  std::string msg_invite =
+      "You have been invited to join channel : " + tmpChan->getChannelName() +
+      " by " + client->getNickname();
+  tmpUser->response(msg_invite);
 
   return true;
 }
+

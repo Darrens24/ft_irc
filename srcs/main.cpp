@@ -14,6 +14,7 @@
 #include "../headers/utils.hpp"
 #include <cstring>
 #include <iostream>
+#include <signal.h>
 #include <string>
 #include <unistd.h>
 

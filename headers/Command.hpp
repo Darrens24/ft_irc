@@ -2,7 +2,7 @@
 
 #define ERR_NEEDMOREPARAMS(client1, command1)                                  \
   "461 " + client1 + " " + command1 +                                          \
-      " :" RED "Error" WHT ": Not enough parameters" NC
+      " :" RED "Error" WHT ": Wrong number of parameters" NC
 
 #define ERR_ALREADYREGISTERED(client1)                                         \
   "462 " + client1 + " :" RED "Error" WHT ": You may not reregister" NC
@@ -50,12 +50,35 @@
   "401 " + client1 + " " + channel1 + " :" WHT "No such nick" NC
 
 #define ERR_INVALIDKEY(client1, channel1)                                      \
-  "525 " + client1 + " " + channel1 +                                          \
-      " :" RED "Error" WHT ": Cannot join channel (+k)" NC
+  "525 " + client1 + " " + channel1 + " :" RED "Error" WHT ": Bad params" NC
+
+#define ERR_NORECIPIENT(client1, command1)                                     \
+  "411 " + client1 + " " + command1 +                                          \
+      " :" RED "Error" WHT ": No recipient given (" + command1 + ")" NC
 
 #define ERR_NOTONCHANNEL(client1, channel1)                                    \
-  "442 " + client1 + " " + channel1 + RED "Error" +                            \
-      NC ":" WHT "You're not on that channel" NC
+  "442 " + client1 + " " + channel1 + " :" WHT "You're not on that channel" NC
+
+#define ERR_CHANOPRIVSNEEDED(client1, channel1)                                \
+  "482 " + client1 + " " + channel1 + " :" WHT "You're not channel operator" NC
+
+#define ERR_USERONCHANNEL(client1, nickname1, channel1)                        \
+  "443 " + client1 + " " + nickname1 + " " + channel1 +                        \
+      " :" WHT "is already on channel" NC
+
+#define ERR_UNKNOWNMODE(client1, mode1)                                        \
+  "472 " + client1 + " " + mode1 + " :" WHT "is unknown mode char to me" NC
+
+#define RPL_INVITING(client1, nickname1, channel1)                             \
+  "341 " + client1 + " " + nickname1 + " " + channel1 +                        \
+      " :" WHT "has been invited to channel" NC
+
+#define RPL_UMODEIS(client1, mode1)                                            \
+  "221 " + client1 + " " + mode1 + " :" WHT "is your current mode" NC
+
+#define RPL_CHANNELMODEIS(client1, channel1, mode1)                            \
+  "324 " + client1 + " " + channel1 + " " + mode1 +                            \
+      " :" WHT "is current channel mode" NC
 
 #include "Server.hpp"
 #include <numeric>
@@ -123,7 +146,10 @@ public:
   ~Privmsg();
 
   bool execute(User *client, std::vector<std::string> args);
-  void SendPrivateMessage(User *client, std::vector<std::string> args);
+  void SendPrivateMessage(User *client, std::string target,
+                          std::vector<std::string> args);
+  bool execute_msg(User *client, std::string target,
+                   std::vector<std::string> args);
 };
 
 class Kick : public Command {

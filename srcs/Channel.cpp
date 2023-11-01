@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/25 16:20:20 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/27 12:25:44 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/31 10:17:15 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,6 +108,13 @@ void Channel::responseALL(std::string response) {
   for (std::vector<User *>::iterator it = _users.begin(); it != _users.end();
        it++) {
     (*it)->response(response);
+  }
+}
+
+void Channel::sentMessageToAllMembers(std::string message) {
+  for (std::vector<User *>::iterator it = _users.begin(); it != _users.end();
+       it++) {
+    (*it)->response(message);
   }
 }
 

@@ -6,7 +6,7 @@
 /*   By: feliciencatteau <feliciencatteau@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/26 11:02:02 by feliciencat       #+#    #+#             */
-/*   Updated: 2023/10/27 16:28:25 by feliciencat      ###   ########.fr       */
+/*   Updated: 2023/10/31 14:43:10 by feliciencat      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,13 +35,6 @@ bool Join::execute(User *client, std::vector<std::string> args) {
     return false;
   }
 
-  if (args[1][0] == '#') {
-    args[1].erase(0, 1);
-  } else {
-    client->response(ERR_BADCHANMASK(client->getNickname(), "JOIN"));
-    return false;
-  }
-
   bool found_channel = false;
   std::vector<std::string> keys;
   std::vector<std::string> allchannels = myOwnSplit(args[1], ",");
@@ -51,10 +44,15 @@ bool Join::execute(User *client, std::vector<std::string> args) {
     keys = myOwnSplit(args[2], ",");
   }
 
-  // map with channel name and key
   std::map<std::string, std::string> channel_key;
   for (std::vector<std::string>::iterator iter = allchannels.begin();
        iter != allchannels.end(); iter++) {
+    if ((*iter)[0] == '#') {
+      (*iter).erase(0, 1);
+    } else {
+      client->response(ERR_BADCHANMASK(client->getNickname(), "JOIN"));
+      return false;
+    }
     if (keys.size() > 0) {
       channel_key.insert(std::pair<std::string, std::string>(*iter, keys[0]));
       keys.erase(keys.begin());
@@ -73,7 +71,9 @@ bool Join::execute(User *client, std::vector<std::string> args) {
       if (iter->first == it->first) {
         found_channel = true;
         if (iter->second->isInChannel(client)) {
-          client->response("You are already in the channel");
+          client->response(ERR_USERONCHANNEL(client->getNickname(),
+                                             client->getNickname(),
+                                             iter->second->getChannelName()));
           break;
         }
         if (it->second != iter->second->getKey()) {
@@ -81,7 +81,13 @@ bool Join::execute(User *client, std::vector<std::string> args) {
                                              iter->second->getChannelName()));
           break;
         }
-
+        if (iter->second->findMode('l')) {
+          if (iter->second->getNumberofUsers() >= iter->second->getLimit()) {
+            client->response(ERR_CHANNELISFULL(client->getNickname(),
+                                               iter->second->getChannelName()));
+            break;
+          }
+        }
         if (iter->second->findMode('i') == true) {
           if (client->isInvited(iter->second) == false) {
             client->response(ERR_INVITEONLYCHAN(
@@ -120,11 +126,11 @@ bool Join::execute(User *client, std::vector<std::string> args) {
       Channel *newChannel = new Channel(it->first);
 
       newChannel->addUser(client);
+      client->addChannelWhereUserIsOperator(newChannel);
       newChannel->setKey(it->second);
       if (it->second != "") {
         newChannel->addMode('k');
-        std::cout << BLU CLIENTSPEAK(this->_srv->getUserPort(client->getFd()))
-                  << W ": The channel below has a password" NC << std::endl;
+        std::cout << "mode +k added because key is set" << std::endl;
       }
       newChannel->setOwner(client);
       _srv->getChannel().insert(
