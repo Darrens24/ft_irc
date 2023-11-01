@@ -237,22 +237,18 @@ void Server::launchParser(std::string str, int fd) {
   if (array.size() == 0)
     return;
 
+  std::cout << "We received: " << str << std::endl;
+
   if (array[0] == "PASS") {
     Pass pass(this);
-    if (!pass.execute(this->_users[fd], array)) {
+    if (!pass.execute(this->_users[fd], array))
       return;
-    }
-    // array.erase(array.begin());
-    // array.erase(array.begin());
   }
   if (array[0] == "NICK") {
     if (this->_users[fd]->getRegistered() == true) {
       Nick nick(this);
-      if (!nick.execute(this->_users[fd], array)) {
+      if (!nick.execute(this->_users[fd], array))
         return;
-      }
-      // array.erase(array.begin());
-      // array.erase(array.begin());
     } else {
       this->_users[fd]->response(RED "You need to set password first" NC);
     }
@@ -260,11 +256,8 @@ void Server::launchParser(std::string str, int fd) {
   if (array[0] == "USER") {
     if (this->_users[fd]->getRegistered() == true) {
       Usercmd user(this);
-      if (!user.execute(this->_users[fd], array)) {
+      if (!user.execute(this->_users[fd], array))
         return;
-      }
-      // array.erase(array.begin());
-      // array.erase(array.begin());
     } else {
       this->_users[fd]->response(RED "You need to set password first" NC);
     }

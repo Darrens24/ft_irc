@@ -12,20 +12,9 @@
 
 #include "../headers/User.hpp"
 #include "../headers/Server.hpp"
+#include "../headers/utils.hpp"
 
-int myAtoi(char *str) {
-  int res = 0;
-  int sign = 1;
-  int i = 0;
-
-  if (str[0] == '-') {
-    sign = -1;
-    i++;
-  }
-  for (; str[i] != '\0'; ++i)
-    res = res * 10 + str[i] - '0';
-  return sign * res;
-}
+/***\ CONSTRUCTORS \***/
 
 User::User(int newSock, char host[NI_MAXHOST], char service[NI_MAXSERV],
            std::string srvpasswd)
@@ -41,10 +30,24 @@ User::User(const User &cpy) { *this = cpy; }
 
 User &User::operator=(const User &e) {
   _fd = e._fd;
+  _hostname = e._hostname;
+  _port = e._port;
+  _username = e._username;
+  _nickname = e._nickname;
+  _realname = e._realname;
+  _password = e._password;
+  _registered = e._registered;
+  _nickRegistered = e._nickRegistered;
+  _userRegistered = e._userRegistered;
+  _channelsInvited = e._channelsInvited;
+  _channelsWhereUserIsOperator = e._channelsWhereUserIsOperator;
+
   return *this;
 }
 
-bool User::is_invited(Channel *channel) {
+/***\ METHODS \***/
+
+bool User::isInvited(Channel *channel) {
   for (std::vector<Channel *>::iterator it = _channelsInvited.begin();
        it != _channelsInvited.end(); it++) {
     if (*it == channel)
@@ -77,12 +80,6 @@ bool User::isUserOperator(Channel *channel) {
   }
   return false;
 }
-
-void User::setNickname(std::string nickname) { _nickname = nickname; }
-
-void User::setUsername(std::string username) { _username = username; }
-
-void User::setRealName(std::string realname) { _realname = realname; }
 
 void User::setChannelInvited(Channel *channel) {
   _channelsInvited.push_back(channel);

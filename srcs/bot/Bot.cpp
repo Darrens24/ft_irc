@@ -61,6 +61,7 @@ bool Bot::connectToServer() {
   std::string everything = password + nickname + username;
 
   this->response(everything);
+
   while (1) {
     char buffer[1024];
     memset(buffer, 0, 1024);

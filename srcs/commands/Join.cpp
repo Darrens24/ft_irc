@@ -82,7 +82,7 @@ bool Join::execute(User *client, std::vector<std::string> args) {
         }
 
         if (iter->second->findMode('i') == true) {
-          if (client->is_invited(iter->second) == false) {
+          if (client->isInvited(iter->second) == false) {
             client->response(ERR_INVITEONLYCHAN(
                 client->getNickname(), iter->second->getChannelName()));
             break;

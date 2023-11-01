@@ -30,6 +30,7 @@ OBJ_DIR = objs
 OBJ_DIR_BOT = objs_bot
 
 SRCS = 	$(SRC_DIR)/main.cpp \
+				 	$(SRC_DIR)/utils.cpp \
 				 	$(SRC_DIR)/Channel.cpp \
 				 	$(SRC_DIR)/User.cpp \
 				 	$(SRC_DIR)/Server.cpp \

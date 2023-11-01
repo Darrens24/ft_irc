@@ -11,34 +11,14 @@
 /* ************************************************************************** */
 
 #include "../headers/Server.hpp"
+#include "../headers/utils.hpp"
 #include <cstring>
 #include <iostream>
-#include <signal.h>
 #include <string>
 #include <unistd.h>
 
 using namespace std;
 bool server_up = true;
-
-void exit_server(int signal) {
-  if (signal == SIGINT) {
-    server_up = false;
-  }
-}
-
-int myAtoi2(char *str) {
-  int res = 0;
-  int sign = 1;
-  int i = 0;
-
-  if (str[0] == '-') {
-    sign = -1;
-    i++;
-  }
-  for (; str[i] != '\0'; ++i)
-    res = res * 10 + str[i] - '0';
-  return sign * res;
-}
 
 int main(int ac, char **av) {
   if (ac != 3) {
@@ -47,7 +27,7 @@ int main(int ac, char **av) {
   }
 
   signal(SIGINT, exit_server);
-  Server server(myAtoi2(av[1]), av[2]);
+  Server server(myAtoi(av[1]), av[2]);
   server.start();
 
   return 0;

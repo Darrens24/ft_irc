@@ -10,8 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef USER_HPP
-#define USER_HPP
+#pragma once
 
 #include "colors.hpp"
 #include <arpa/inet.h>
@@ -24,6 +23,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
+
 class Channel;
 
 class User {
@@ -42,28 +42,24 @@ private:
   std::vector<Channel *> _channelsWhereUserIsOperator;
 
 public:
-  // canonical form
-  User(int newSock, char host[NI_MAXHOST], char service[NI_MAXSERV]);
-
-public:
-  // canonical form
+  // constructors
   User(int newSock, char host[NI_MAXHOST], char service[NI_MAXSERV],
        std::string srvpasswd);
   ~User();
   User(const User &cpy);
   User &operator=(const User &e);
 
-  // methodes
+  // methods
   void response(const std::string &response);
-  bool is_invited(Channel *channel);
+  bool isInvited(Channel *channel);
   void addChannelWhereUserIsOperator(Channel *channel);
   void removeChannelWhereUserIsOperator(Channel *channel);
   bool isUserOperator(Channel *channel);
 
   // setters
-  void setNickname(std::string nickname);
-  void setUsername(std::string username);
-  void setRealName(std::string realname);
+  void setNickname(std::string nickname) { _nickname = nickname; }
+  void setUsername(std::string username) { _username = username; }
+  void setRealName(std::string realname) { _realname = realname; }
   void setRegistered() { _registered = true; }
   void setNickRegistered() { _nickRegistered = true; }
   void setUserRegistered() { _userRegistered = true; }
@@ -86,5 +82,3 @@ public:
     return _channelsWhereUserIsOperator;
   }
 };
-
-#endif

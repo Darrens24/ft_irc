@@ -36,24 +36,23 @@ private:
   std::vector<char> _mode;
 
 public:
-  // canonical form
+  // constructors
   Channel(std::string channelName);
   ~Channel();
   Channel(const Channel &cpy);
   Channel &operator=(const Channel &e);
 
-  // methodes
+  // methods
   int addUser(User *u);
   int isInChannel(User *u);
   void removeUserFromChannel(User *u);
+
   void responseALL(std::string response);
   void responseALLnotMe(std::string response, std::string nick);
-  bool removeMode(
-      char mode); // return true if mode is removed, false if mode is not found
-  bool addMode(
-      char mode); // return true if mode is added, false if mode is already set
-  bool findMode(char mode);
 
+  bool removeMode(char mode);
+  bool addMode(char mode);
+  bool findMode(char mode);
   std::string getModeString();
 
   // setters
@@ -63,10 +62,10 @@ public:
   void setMode(char mode) { _mode.push_back(mode); };
 
   // getters
-  User *getOwner();
-  std::string getChannelName();
-  std::vector<User *> &getUsersOfChannel();
-  std::string getKey();
+  User *getOwner() { return _owner; }
+  std::string getChannelName() { return _channelName; };
+  std::vector<User *> &getUsersOfChannel() { return _users; };
+  std::string getKey() { return key; };
   std::string getTopic() { return _topic; };
   std::vector<char> getMode() { return _mode; };
 };

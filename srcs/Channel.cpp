@@ -12,31 +12,32 @@
 
 #include "../headers/Channel.hpp"
 
+/***\ CONSTRUCTORS \***/
+
 Channel::Channel(std::string channelName) : _channelName(channelName) {
-  // Constructeur
   key = "";
 }
 
-Channel::~Channel() {
-  // Destructeur: Libération de ressources, si nécessaire
-}
+Channel::~Channel() {}
 
-Channel::Channel(const Channel &cpy)
-    : _channelName(cpy._channelName), _users(cpy._users) {
-  // Constructeur de copie
-}
+Channel::Channel(const Channel &cpy) { *this = cpy; }
 
 Channel &Channel::operator=(const Channel &e) {
   if (this == &e) {
-    return *this; // retourne *this pour traiter l'affectation à soi-même
+    return *this;
   }
 
-  // Copie les attributs
   this->_channelName = e._channelName;
   this->_users = e._users;
+  this->_owner = e._owner;
+  this->key = e.key;
+  this->_topic = e._topic;
+  this->_mode = e._mode;
 
   return *this;
 }
+
+/***\ METHODS \***/
 
 int Channel::addUser(User *u) {
   _users.push_back(u);
@@ -103,18 +104,6 @@ bool Channel::findMode(char mode) {
   return false;
 }
 
-void Channel::setOwner(User *u) { _owner = u; }
-
-User *Channel::getOwner() { return _owner; }
-
-std::string Channel::getChannelName() { return _channelName; }
-
-std::vector<User *> &Channel::getUsersOfChannel() { return this->_users; }
-
-std::string Channel::getKey() { return this->key; }
-
-void Channel::setKey(std::string key) { this->key = key; }
-
 void Channel::responseALL(std::string response) {
   for (std::vector<User *>::iterator it = _users.begin(); it != _users.end();
        it++) {
@@ -129,3 +118,9 @@ void Channel::responseALLnotMe(std::string response, std::string nick) {
       (*it)->response(response);
   }
 }
+
+/***\ SETTERS \***/
+
+void Channel::setOwner(User *u) { _owner = u; }
+
+void Channel::setKey(std::string key) { this->key = key; }
