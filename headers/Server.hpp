@@ -14,6 +14,7 @@
 
 extern bool server_up;
 
+#include "../headers/utils.hpp"
 #include "Channel.hpp"
 #include "Command.hpp"
 #include "User.hpp"
@@ -54,7 +55,7 @@ private:
   std::map<int, std::string> _userport;
 
 public:
-  // canonical form
+  // constructors
   Server(int port, std::string password);
   ~Server();
   Server(const Server &cpy);
@@ -62,16 +63,15 @@ public:
 
   // getters
   std::vector<User *> getUsersOnly();
-  std::map<std::string, Channel *> &getChannels() { return _channels; }
   Channel *getChannelByName(std::string name);
   User *getUserByNickname(std::string nickname);
-  std::string getUserPort(int fd);
+
+  std::map<std::string, Channel *> &getChannel() { return _channels; }
+  std::map<std::string, Channel *> &getChannels() { return _channels; }
+  std::string getUserPort(int fd) { return _userport[fd]; }
   struct sockaddr_in &getAddr() { return _address; }
   std::string getPassword() { return _password; }
   int getPort() { return _port; }
-
-  // bools
-  bool isNicknameAvailable(std::string nickname);
 
   // init
   void start();
@@ -80,12 +80,14 @@ public:
   void readFromClient(int fd, int i);
   void launchParser(std::string str, int fd);
 
-  int initChecker(int fd);
-  void askUserData(int fd);
+  // commands
+  void removeUserFromServer(int i);
+  void removeUserFromChannelDB(int i);
 
   // channels
   int createChannel(std::string name, User *u);
   int joinChannel(std::string name, User *u);
-  std::string sendMsgToChannel(std::string target, std::string msg, User *u);
-  std::map<std::string, Channel *> &getChannel();
+
+  // bools
+  bool isNicknameAvailable(std::string nickname);
 };

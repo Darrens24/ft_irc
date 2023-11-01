@@ -11,20 +11,8 @@
 /* ************************************************************************** */
 
 #include "../headers/Server.hpp"
-#include <string>
-#include <sys/types.h>
 
-std::vector<std::string> mySplit(std::string str, std::string sep) {
-  char *cstr = const_cast<char *>(str.c_str());
-  char *current;
-  std::vector<std::string> arr;
-  current = strtok(cstr, sep.c_str());
-  while (current != NULL) {
-    arr.push_back(current);
-    current = strtok(NULL, sep.c_str());
-  }
-  return arr;
-}
+/***\ CONSTRUCTORS \***/
 
 Server::Server(int port, std::string password)
     : _serverName("our-IRC"), _password(password), _port(port), _opt(1),
@@ -36,20 +24,20 @@ Server::Server(int port, std::string password)
               << std::endl;
     exit(EXIT_FAILURE);
   }
-  std::cout << MAG SERVERSPEAK YEL ": Socket created" NC << std::endl;
+  std::cout << MAG SERVERSPEAK NC ": Socket created" << std::endl;
 
   if (setsockopt(this->_socket, SOL_SOCKET, SO_REUSEADDR, &this->_opt,
                  sizeof(int))) {
     std::cout << RED SERVERSPEAK " Error: Setsockopt failed" NC << std::endl;
     exit(EXIT_FAILURE);
   }
-  std::cout << MAG SERVERSPEAK YEL ": Socket reusable" NC << std::endl;
+  std::cout << MAG SERVERSPEAK NC ": Socket reusable" << std::endl;
 
   if (fcntl(this->_socket, F_SETFL, O_NONBLOCK) < 0) {
     std::cout << RED SERVERSPEAK " Error: Fcntl failed" NC << std::endl;
     exit(EXIT_FAILURE);
   }
-  std::cout << MAG SERVERSPEAK YEL ": Socket non-blocking" NC << std::endl;
+  std::cout << MAG SERVERSPEAK NC ": Socket set non-blocking" << std::endl;
 
   this->_address.sin_family = AF_INET;
   this->_address.sin_addr.s_addr = INADDR_ANY;
@@ -61,13 +49,13 @@ Server::Server(int port, std::string password)
     std::cout << RED SERVERSPEAK " Error: Bind failed" NC << std::endl;
     exit(EXIT_FAILURE);
   }
-  std::cout << MAG SERVERSPEAK YEL ": Socket binded" NC << std::endl;
+  std::cout << MAG SERVERSPEAK NC ": Socket binded" << std::endl;
 
   if (listen(this->_socket, this->_maxClients) < 0) {
     std::cout << RED SERVERSPEAK " Error: Listen failed" NC << std::endl;
     exit(EXIT_FAILURE);
   }
-  std::cout << MAG SERVERSPEAK YEL ": Server listening on port " << port << NC
+  std::cout << MAG SERVERSPEAK NC ": Ready! Server listening on port " << port
             << std::endl;
 }
 
@@ -78,6 +66,10 @@ Server::~Server() {
   while (!this->_users.empty()) {
     delete this->_users.begin()->second;
     this->_users.erase(this->_users.begin());
+  }
+  while (!this->_channels.empty()) {
+    delete this->_channels.begin()->second;
+    this->_channels.erase(this->_channels.begin());
   }
 }
 
@@ -98,6 +90,36 @@ Server &Server::operator=(const Server &e) {
   return *this;
 }
 
+/***\ COMMANDS \***/
+
+void Server::removeUserFromChannelDB(int i) {
+  for (std::map<std::string, Channel *>::iterator it = this->_channels.begin();
+       it != this->_channels.end(); ++it) {
+    if (it->second->isInChannel(this->_users[this->_polls[i].fd])) {
+      this->_channels[it->first]->removeUserFromChannel(
+          this->_users[this->_polls[i].fd]);
+    }
+    if (it->second->getUsersOfChannel().size() == 0) {
+      delete it->second;
+      this->_channels.erase(it);
+      if (this->_channels.size() == 0)
+        break;
+    }
+  }
+}
+
+void Server::removeUserFromServer(int i) {
+  this->removeUserFromChannelDB(i);
+  close(this->_polls[i].fd);
+  this->_users[this->_polls[i].fd]->setUserUnregistered();
+  this->_users[this->_polls[i].fd]->setNickUnregistered();
+  delete this->_users[this->_polls[i].fd];
+  this->_users.erase(this->_polls[i].fd);
+  this->_polls.erase(this->_polls.begin() + i);
+}
+
+/***\ INIT \***/
+
 void Server::start() {
   pollfd serverPoll;
   serverPoll.fd = this->_socket;
@@ -105,7 +127,7 @@ void Server::start() {
   serverPoll.revents = 0;
 
   this->_polls.push_back(serverPoll);
-  std::cout << MAG SERVERSPEAK YEL ": Poll server created" NC << std::endl;
+  std::cout << MAG SERVERSPEAK NC ": Poll server created" << std::endl;
 
   while (server_up) {
     int pollCount = poll(&this->_polls[0], this->_polls.size(), -1);
@@ -118,12 +140,7 @@ void Server::start() {
       if (this->_polls[i].revents & POLLRDHUP) {
         std::cout << RED CLIENTSPEAK(this->_userport[this->_polls[i].fd])
                   << ": Disconnected" NC << std::endl;
-        close(this->_polls[i].fd);
-        this->_users[this->_polls[i].fd]->setUserUnregistered();
-        this->_users[this->_polls[i].fd]->setNickUnregistered();
-        delete this->_users[this->_polls[i].fd];
-        this->_users.erase(this->_polls[i].fd);
-        this->_polls.erase(this->_polls.begin() + i);
+        this->removeUserFromServer(i);
         break;
       }
       if (this->_polls[i].revents & POLLIN) {
@@ -143,28 +160,21 @@ void Server::readFromClient(int fd, int i) {
   char buffer[1024];
   memset(buffer, 0, 1024);
   static std::string save;
-  std::string strbuffer;
+  (void)i;
 
   ssize_t read = recv(fd, buffer, 1024, 0);
   if (read < 0) {
     std::cout << RED SERVERSPEAK " Error: Recv failed" NC << std::endl;
-    exit(EXIT_FAILURE);
-  }
-  if (read == 0) {
-    std::cout << RED SERVERSPEAK " Error: Couldn't read from client" NC
-              << std::endl;
-    close(this->_polls[i].fd);
-    this->_users.erase(this->_polls[i].fd);
-    this->_polls.erase(this->_polls.begin() + i);
     return;
   }
-  strbuffer = buffer;
-  if (save.size())
+
+  std::string strbuffer = buffer;
+  if (save.size() > 0)
     strbuffer = save + buffer;
   std::string tmp = std::string(buffer);
   if (tmp.find('\n') != tmp.npos) {
-    std::cout << BLU CLIENTSPEAK(this->_userport[fd]) << W << ": " << strbuffer
-              << NC;
+    std::cout << BLU CLIENTSPEAK(this->_userport[fd]) << NC << ": "
+              << strbuffer;
     if (this->_users[fd]->getUserRegistered() == false ||
         this->_users[fd]->getRegistered() == false ||
         this->_users[fd]->getNickname() == "")
@@ -183,6 +193,7 @@ bool Server::getBasicInfo(int fd, std::string str) {
   if (array.size() == 0) {
     return false;
   }
+
   if (array[0] == "CAP") {
     array.erase(array.begin());
     if (array.size() > 0)
@@ -225,7 +236,7 @@ bool Server::getBasicInfo(int fd, std::string str) {
       this->_users[fd]->getRegistered() == true) {
     this->_users[fd]->response("CAP * LS :multi-prefix sasl");
     std::string welcomeMssg = "001 " + this->_users[fd]->getNickname() +
-                              " :Welcome to the Internet Relay Network";
+                              " :Welcome to our Internet Relay Network!";
     this->_users[fd]->response(welcomeMssg);
   }
   return true;
@@ -236,8 +247,6 @@ void Server::launchParser(std::string str, int fd) {
 
   if (array.size() == 0)
     return;
-
-  std::cout << "We received: " << str << std::endl;
 
   if (array[0] == "PASS") {
     Pass pass(this);
@@ -297,9 +306,10 @@ void Server::acceptNewClient() {
                   (socklen_t *)&this->_addrLen);
   if (fd < 0) {
     std::cout << RED SERVERSPEAK " Error: Accept failed" NC << std::endl;
-    exit(EXIT_FAILURE);
+    return;
   }
-  std::cout << GRN SERVERSPEAK << W ": New client accepted" NC << std::endl;
+  std::cout << GRN SERVERSPEAK << NC ": New client accepted" << std::endl;
+
   pollfd newPoll;
   newPoll.fd = fd;
   newPoll.events = POLLIN | POLLHUP | POLLRDHUP;
@@ -315,16 +325,48 @@ void Server::acceptNewClient() {
                         hostName, NI_MAXHOST, hostService, NI_MAXSERV, 0);
   if (res) {
     std::cout << RED SERVERSPEAK " Error: Getnameinfo failed" NC << std::endl;
-    exit(EXIT_FAILURE);
+    return;
   }
+
   this->_userport[fd] = hostService;
   std::cout << GRN CLIENTSPEAK(this->_userport[fd])
-            << W ": New client connected on port " << hostService << NC
+            << NC ": New client connected on port " GRN << hostService << NC
             << std::endl;
 
   User *newUser;
   newUser = new User(fd, hostName, hostService, this->_password);
   this->_users.insert(std::make_pair(fd, newUser));
+}
+
+/***\ getters \***/
+
+Channel *Server::getChannelByName(std::string name) {
+  if (_channels[name] != NULL) {
+    return _channels[name];
+  } else {
+    return NULL;
+  }
+}
+
+User *Server::getUserByNickname(std::string nickname) {
+  for (std::map<int, User *>::iterator it = _users.begin(); it != _users.end();
+       ++it) {
+    if (it->second->getNickname() == nickname) {
+      return it->second;
+    }
+  }
+  return NULL;
+}
+
+std::vector<User *> Server::getUsersOnly() {
+  std::vector<User *> usersOnly;
+
+  for (std::map<int, User *>::iterator it = _users.begin(); it != _users.end();
+       ++it) {
+    usersOnly.push_back(it->second);
+  }
+
+  return usersOnly;
 }
 
 /***\ channels \***/
@@ -346,27 +388,7 @@ int Server::joinChannel(std::string channelName, User *u) {
     return -1;
 }
 
-std::string sendMsgToChannel(std::string target, std::string msg, User *u);
-
-std::map<std::string, Channel *> &Server::getChannel() { return _channels; }
-
-Channel *Server::getChannelByName(std::string name) {
-  if (_channels[name] != NULL) {
-    return _channels[name];
-  } else {
-    return NULL;
-  }
-}
-
-User *Server::getUserByNickname(std::string nickname) {
-  for (std::map<int, User *>::iterator it = _users.begin(); it != _users.end();
-       ++it) {
-    if (it->second->getNickname() == nickname) {
-      return it->second;
-    }
-  }
-  return NULL;
-}
+/***\ bools \***/
 
 bool Server::isNicknameAvailable(std::string username) {
   for (std::map<int, User *>::iterator it = _users.begin(); it != _users.end();
@@ -376,16 +398,3 @@ bool Server::isNicknameAvailable(std::string username) {
   }
   return true;
 }
-
-std::vector<User *> Server::getUsersOnly() {
-  std::vector<User *> usersOnly;
-
-  for (std::map<int, User *>::iterator it = _users.begin(); it != _users.end();
-       ++it) {
-    usersOnly.push_back(it->second);
-  }
-
-  return usersOnly;
-}
-
-std::string Server::getUserPort(int fd) { return this->_userport[fd]; }

@@ -34,6 +34,7 @@ bool Join::execute(User *client, std::vector<std::string> args) {
     client->response(ERR_NEEDMOREPARAMS(client->getNickname(), "JOIN"));
     return false;
   }
+
   if (args[1][0] == '#') {
     args[1].erase(0, 1);
   } else {
