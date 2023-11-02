@@ -28,6 +28,14 @@ int myStrAtoi(std::string str) {
   return sign * res;
 }
 
+std::string myStoi(int i) {
+  std::string s;
+  std::stringstream out;
+  out << i;
+  s = out.str();
+  return s;
+}
+
 void exit_server(int signal) {
   if (signal == SIGINT) {
     server_up = false;

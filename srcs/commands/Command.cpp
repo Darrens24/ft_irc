@@ -54,6 +54,7 @@ Nick::Nick(Server *srv) : Command(srv) {}
 Nick::~Nick(){};
 
 bool Nick::execute(User *client, std::vector<std::string> args) {
+  static int i = 0;
   if (args.size() < 2) {
     client->response(ERR_NONICKNAMEGIVEN(client->getHostname()));
     return false;
@@ -67,10 +68,11 @@ bool Nick::execute(User *client, std::vector<std::string> args) {
 
   if (this->_srv->isNicknameAvailable(args[1]) == false) {
     client->response(ERR_NICKNAMEINUSE(client->getHostname(), "NICK"));
-    return false;
-  }
+    std::string newNick = args[1] + myStoi(i);
+    client->setNickname(newNick);
+  } else
+    client->setNickname(args[1]);
 
-  client->setNickname(args[1]);
   client->setNickRegistered();
   std::string login =
       GRN "<" + client->getNickname() + "> " NC ":Nickname has been set";
