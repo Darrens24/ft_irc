@@ -126,8 +126,21 @@ void Channel::responseALLnotMe(std::string response, std::string nick) {
   }
 }
 
+void Channel::addOperator(User *u) { _operators.push_back(u); }
+
 /***\ SETTERS \***/
 
 void Channel::setOwner(User *u) { _owner = u; }
 
 void Channel::setKey(std::string key) { this->key = key; }
+
+/***\ BOOLS \***/
+
+bool Channel::isOperator(User *u) {
+  for (std::vector<User *>::iterator it = _operators.begin();
+       it != _operators.end(); it++) {
+    if (*it == u)
+      return true;
+  }
+  return false;
+}

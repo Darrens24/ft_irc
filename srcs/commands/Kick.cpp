@@ -78,17 +78,29 @@ bool Kick::execute(User *client, std::vector<std::string> args) {
       if ((*it)->getNickname() == tmpUser->getNickname()) {
         std::string msg = "";
         if (reason == false)
-          msg = "You have been kicked by " + client->getNickname();
+          // msg = "You have been kicked by " + client->getNickname();
+          msg = tmpUser->getNickname() + " has been kicked by " +
+                client->getNickname();
 
         else {
-          msg = "You have been kicked by " + client->getNickname() + " for " +
-                args[3];
+          // msg = "You have been kicked by " + client->getNickname() + " for "
+          // +
+          //       args[3];
+          msg = tmpUser->getNickname() + " has been kicked by " +
+                client->getNickname() + " for " + args[3];
         }
-        (*it)->response(msg);
+        // (*it)->response(msg);
+        Privmsg privmsg(_srv);
+        std::string chann = "#" + tmpChan->getChannelName();
+        std::vector<std::string> array_msg;
+        array_msg.push_back("PRIVMSG");
+        array_msg.push_back(chann);
+        array_msg.push_back(msg);
+        privmsg.execute_msg(client, chann, array_msg);
         tmpChan->getUsersOfChannel().erase(it);
-        tmpChan->sentMessageToAllMembers(tmpUser->getNickname() +
-                                         " has been kicked by " +
-                                         client->getNickname());
+        // tmpChan->sentMessageToAllMembers(tmpUser->getNickname() +
+        //                                  " has been kicked by " +
+        //                                  client->getNickname());
         found_user = true;
         break;
       }
@@ -100,4 +112,3 @@ bool Kick::execute(User *client, std::vector<std::string> args) {
   }
   return true;
 }
-

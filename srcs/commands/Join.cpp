@@ -105,10 +105,17 @@ bool Join::execute(User *client, std::vector<std::string> args) {
 
         std::vector<User *> tmpUsers = iter->second->getUsersOfChannel();
         std::string stringUsers = "";
+        std::vector<Channel *> tmpChannels =
+            client->getChannelsWhereUserIsOperator();
+        Channel *tmpChannel = iter->second;
 
         for (std::vector<User *>::iterator it = tmpUsers.begin();
              it != tmpUsers.end(); it++) {
-          stringUsers += (*it)->getNickname() + " ";
+          if (tmpChannel->isOperator(*it)) {
+            stringUsers += "@" + (*it)->getNickname() + " ";
+          } else {
+            stringUsers += (*it)->getNickname() + " ";
+          }
         }
 
         iter->second->responseALL(
@@ -123,6 +130,7 @@ bool Join::execute(User *client, std::vector<std::string> args) {
       Channel *newChannel = new Channel(it->first);
 
       newChannel->addUser(client);
+      newChannel->addOperator(client);
       client->addChannelWhereUserIsOperator(newChannel);
       newChannel->setKey(it->second);
       if (it->second != "") {
@@ -149,7 +157,7 @@ bool Join::execute(User *client, std::vector<std::string> args) {
 
       for (std::vector<User *>::iterator it = tmpUsers.begin();
            it != tmpUsers.end(); it++) {
-        stringUsers += (*it)->getNickname() + " ";
+        stringUsers += "@" + (*it)->getNickname() + " ";
       }
       client->response(
           RPL_NAMREPLY(client->getUsername(), "=", chan, stringUsers));

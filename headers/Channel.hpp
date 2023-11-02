@@ -31,6 +31,7 @@ private:
   std::string _channelName;
   std::vector<User *> _users;
   User *_owner;
+  std::vector<User *> _operators;
   std::string key;
   std::string _topic;
   std::vector<char> _mode;
@@ -47,6 +48,7 @@ public:
   int addUser(User *u);
   int isInChannel(User *u);
   void removeUserFromChannel(User *u);
+  void addOperator(User *u);
 
   void responseALL(std::string response);
   void responseALLnotMe(std::string response, std::string nick);
@@ -73,4 +75,7 @@ public:
   std::vector<char> getMode() { return _mode; };
   unsigned int getLimit() { return _limit; };
   unsigned int getNumberofUsers() { return _users.size(); };
+
+  // bools
+  bool isOperator(User *u);
 };
