@@ -30,11 +30,11 @@ bool Kick::execute(User *client, std::vector<std::string> args) {
     client->response("construction : 'KICK #channelname username [:reason]'");
     return false;
   }
-  bool reason = false;
+  // bool reason = false;
   if (args.size() == 4 && args[3].length() > 0) {
     if (args[3][0] == ':') {
       args[3].erase(0, 1);
-      reason = true;
+      // reason = true;
     } else {
       client->response(ERR_NEEDMOREPARAMS(client->getNickname(), "KICK"));
       client->response("construction : 'KICK #channelname username [:reason]'");
@@ -76,27 +76,17 @@ bool Kick::execute(User *client, std::vector<std::string> args) {
              tmpChan->getUsersOfChannel().begin();
          it != tmpChan->getUsersOfChannel().end(); it++) {
       if ((*it)->getNickname() == tmpUser->getNickname()) {
-        std::string msg = "";
-        if (reason == false)
-          // msg = "You have been kicked by " + client->getNickname();
-          msg = tmpUser->getNickname() + " has been kicked by " +
-                client->getNickname();
-
-        else {
-          // msg = "You have been kicked by " + client->getNickname() + " for "
-          // +
-          //       args[3];
-          msg = tmpUser->getNickname() + " has been kicked by " +
-                client->getNickname() + " for " + args[3];
-        }
+        // std::string msg = "";
+        // if (reason == false)
+        //   msg = tmpUser->getNickname() + " has been kicked by " +
+        //         client->getNickname();
+        //
+        // else {
+        //   msg = tmpUser->getNickname() + " has been kicked by " +
+        //         client->getNickname() + " for " + args[3];
+        // }
         // (*it)->response(msg);
-        Privmsg privmsg(_srv);
         std::string chann = "#" + tmpChan->getChannelName();
-        // std::vector<std::string> array_msg;
-        // array_msg.push_back("PRIVMSG");
-        // array_msg.push_back(chann);
-        // array_msg.push_back(msg);
-        // privmsg.execute_msg(client, chann, array_msg);
         std::string mess = ":" + client->getNickname() + "!" +
                            client->getUsername() + "@" + client->getHostname() +
                            " KICK " + chann + " " + tmpUser->getNickname() +
