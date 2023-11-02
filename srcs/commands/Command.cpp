@@ -69,6 +69,7 @@ bool Nick::execute(User *client, std::vector<std::string> args) {
   if (this->_srv->isNicknameAvailable(args[1]) == false) {
     client->response(ERR_NICKNAMEINUSE(client->getHostname(), "NICK"));
     std::string newNick = args[1] + myStoi(i);
+    i++;
     client->setNickname(newNick);
   } else
     client->setNickname(args[1]);
