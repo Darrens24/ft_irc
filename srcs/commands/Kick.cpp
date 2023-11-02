@@ -92,15 +92,17 @@ bool Kick::execute(User *client, std::vector<std::string> args) {
         // (*it)->response(msg);
         Privmsg privmsg(_srv);
         std::string chann = "#" + tmpChan->getChannelName();
-        std::vector<std::string> array_msg;
-        array_msg.push_back("PRIVMSG");
-        array_msg.push_back(chann);
-        array_msg.push_back(msg);
-        privmsg.execute_msg(client, chann, array_msg);
+        // std::vector<std::string> array_msg;
+        // array_msg.push_back("PRIVMSG");
+        // array_msg.push_back(chann);
+        // array_msg.push_back(msg);
+        // privmsg.execute_msg(client, chann, array_msg);
+        std::string mess = ":" + client->getNickname() + "!" +
+                           client->getUsername() + "@" + client->getHostname() +
+                           " KICK " + chann + " " + tmpUser->getNickname() +
+                           " :" + args[3];
+        tmpChan->sentMessageToAllMembers(mess);
         tmpChan->getUsersOfChannel().erase(it);
-        // tmpChan->sentMessageToAllMembers(tmpUser->getNickname() +
-        //                                  " has been kicked by " +
-        //                                  client->getNickname());
         found_user = true;
         break;
       }
