@@ -16,35 +16,9 @@ Join::Join(Server *srv) : Command(srv) {}
 
 Join::~Join() {}
 
-std::vector<std::string> myOwnSplit(std::string str, std::string sep) {
-  char *cstr = const_cast<char *>(str.c_str());
-  char *current;
-  std::vector<std::string> arr;
-  current = strtok(cstr, sep.c_str());
-  while (current != NULL) {
-    arr.push_back(current);
-    current = strtok(NULL, sep.c_str());
-  }
-  return arr;
-}
-
-bool Join::execute(User *client, std::vector<std::string> args) {
-
-  if (args.size() < 2 || args.size() > 4) {
-    client->response(ERR_NEEDMOREPARAMS(client->getNickname(), "JOIN"));
-    return false;
-  }
-
-  bool found_channel = false;
-  std::vector<std::string> keys;
-  std::vector<std::string> allchannels = myOwnSplit(args[1], ",");
-  if (args.size() > 2) {
-
-    args[2] = trim(args[2]);
-    keys = myOwnSplit(args[2], ",");
-  }
-
-  std::map<std::string, std::string> channel_key;
+bool Join::addKey(User *client, std::vector<std::string> keys,
+                  std::map<std::string, std::string> &channel_key,
+                  std::vector<std::string> allchannels) {
   for (std::vector<std::string>::iterator iter = allchannels.begin();
        iter != allchannels.end(); iter++) {
     if ((*iter)[0] == '#') {
@@ -59,6 +33,29 @@ bool Join::execute(User *client, std::vector<std::string> args) {
     } else {
       channel_key.insert(std::pair<std::string, std::string>(*iter, ""));
     }
+  }
+  return true;
+}
+
+bool Join::execute(User *client, std::vector<std::string> args) {
+
+  if (args.size() < 2 || args.size() > 4) {
+    client->response(ERR_NEEDMOREPARAMS(client->getNickname(), "JOIN"));
+    return false;
+  }
+
+  bool found_channel = false;
+  std::vector<std::string> keys;
+  std::vector<std::string> allchannels = mySplit(args[1], ",");
+  if (args.size() > 2) {
+
+    args[2] = trim(args[2]);
+    keys = mySplit(args[2], ",");
+  }
+
+  std::map<std::string, std::string> channel_key;
+  if (this->addKey(client, keys, channel_key, allchannels) == false) {
+    return false;
   }
 
   // check if channel exists

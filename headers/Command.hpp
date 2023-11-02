@@ -1,5 +1,9 @@
 #pragma once
 
+#include "Server.hpp"
+#include <numeric>
+#include <string>
+
 #define ERR_NEEDMOREPARAMS(client1, command1)                                  \
   "461 " + client1 + " " + command1 +                                          \
       " :" RED "Error" WHT ": Wrong number of parameters" NC
@@ -80,10 +84,6 @@
   "324 " + client1 + " " + channel1 + " " + mode1 +                            \
       " :" WHT "is current channel mode" NC
 
-#include "Server.hpp"
-#include <numeric>
-#include <string>
-
 class Server;
 
 class Command {
@@ -105,6 +105,9 @@ public:
   Join(Server *srv);
   ~Join();
 
+  bool addKey(User *client, std::vector<std::string> keys,
+              std::map<std::string, std::string> &channel_key,
+              std::vector<std::string> allchannels);
   bool execute(User *client, std::vector<std::string> args);
 };
 
@@ -136,6 +139,14 @@ class Pass : public Command {
 public:
   Pass(Server *srv);
   ~Pass();
+
+  bool execute(User *client, std::vector<std::string> args);
+};
+
+class Ping : public Command {
+public:
+  Ping(Server *srv);
+  ~Ping();
 
   bool execute(User *client, std::vector<std::string> args);
 };

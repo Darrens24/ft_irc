@@ -35,6 +35,7 @@ SRCS = 	$(SRC_DIR)/main.cpp \
 				 	$(SRC_DIR)/User.cpp \
 				 	$(SRC_DIR)/Server.cpp \
 				 	${SRC_DIR}/commands/Command.cpp \
+				 	${SRC_DIR}/commands/PingPong.cpp \
 				 	${SRC_DIR}/commands/Join.cpp \
 				 	${SRC_DIR}/commands/Invite.cpp \
 				 	${SRC_DIR}/commands/Kick.cpp \

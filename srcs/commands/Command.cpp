@@ -17,9 +17,7 @@ Command::Command(Server *srv) : _srv(srv) {}
 
 Command::~Command() {}
 
-/*
- *            PASS COMMAND
- * */
+/***\ PASS \***/
 
 Pass::Pass(Server *srv) : Command(srv) {}
 
@@ -41,18 +39,15 @@ bool Pass::execute(User *client, std::vector<std::string> args) {
     return false;
   }
 
-  std::string login = GRN "<" + client->getHostname() +
-                      "> " W
-                      ":Login succesful, please now enter your username and "
-                      "nickname with USER [Username] and NICK [Nickname]" NC;
+  std::string login =
+      GRN "<" + client->getHostname() +
+      "> " NC ":Login succesful, finish registration with USER and NICK ";
   client->setRegistered();
   client->response(login);
   return true;
 }
 
-/*
- *            NICK COMMAND
- * */
+/***\ NICK \***/
 
 Nick::Nick(Server *srv) : Command(srv) {}
 
@@ -78,14 +73,12 @@ bool Nick::execute(User *client, std::vector<std::string> args) {
   client->setNickname(args[1]);
   client->setNickRegistered();
   std::string login =
-      GRN "<" + client->getNickname() + "> " W ":Nickname has been set" NC;
+      GRN "<" + client->getNickname() + "> " NC ":Nickname has been set";
   client->response(login);
   return true;
 }
 
-/*
- *            USER COMMAND
- * */
+/***\ USER \***/
 
 Usercmd::Usercmd(Server *srv) : Command(srv) {}
 
@@ -106,7 +99,7 @@ bool Usercmd::execute(User *client, std::vector<std::string> args) {
   client->setRealName(args[4]);
   client->setUserRegistered();
   std::string login =
-      GRN "<" + client->getUsername() + "> " W ":User has been set" NC;
+      GRN "<" + client->getUsername() + "> " NC ":User has been set";
   client->response(login);
   return true;
 }

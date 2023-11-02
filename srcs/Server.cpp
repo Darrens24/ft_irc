@@ -234,8 +234,9 @@ bool Server::getBasicInfo(int fd, std::string str) {
   if (this->_users[fd]->getNickRegistered() == true &&
       this->_users[fd]->getUserRegistered() == true &&
       this->_users[fd]->getRegistered() == true) {
-    std ::cout << "we are in" << std::endl;
     this->_users[fd]->response("CAP * LS :multi-prefix sasl");
+    std::cout << GRN SERVERSPEAK << NC ": " << this->_users[fd]->getNickname()
+              << " is now registered" << std::endl;
     std::string welcomeMssg = "001 " + this->_users[fd]->getNickname() +
                               " :Welcome to our Internet Relay Network!";
     this->_users[fd]->response(welcomeMssg);
@@ -249,6 +250,11 @@ void Server::launchParser(std::string str, int fd) {
   if (array.size() == 0)
     return;
 
+  if (array[0] == "PING") {
+    Ping ping(this);
+    if (!ping.execute(this->_users[fd], array))
+      return;
+  }
   if (array[0] == "PASS") {
     Pass pass(this);
     if (!pass.execute(this->_users[fd], array))
