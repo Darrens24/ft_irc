@@ -1,4 +1,5 @@
 #include "../../headers/Bot.hpp"
+#include <ctime>
 
 #define host "localhost";
 
@@ -6,8 +7,11 @@
 
 Bot::Bot(int port, std::string password)
     : _botPort(port), _botPassword(password) {
-  this->_botMessages.push_back("Bienvenue a tout le monde sur le serveur !");
-  this->_botMessages.push_back("Je suis un bot !");
+  this->_botMessages.push_back(" :Nice try !");
+  this->_botMessages.push_back(" :Je suis un bot !");
+  this->_botMessages.push_back(
+      " :The guy who loves walking, will walk longer than the guy who "
+      "loves the destination");
   this->_nickname = "Sunbot";
   this->_username = "Sunbot";
   this->_realname = "elbot";
@@ -74,7 +78,26 @@ bool Bot::connectToServer() {
 
     std::string strbuffer = buffer;
 
-    std::cout << "J'AI RECU: " << strbuffer << std::endl;
+    if (strbuffer.find("PRIVMSG") != std::string::npos) {
+      strbuffer = strbuffer.substr(1, strbuffer.length());
+      std::string msg = strbuffer.substr(strbuffer.find(":"), 5);
+      int random = rand();
+      if (!msg.compare(":help")) {
+        std::string username = strbuffer.substr(0, strbuffer.find("!"));
+        std::string reply;
+        if ((random % 3) == 0)
+          reply = "PRIVMSG " + username + this->_botMessages[0];
+        else if ((random % 3) == 1)
+          reply = "PRIVMSG " + username + this->_botMessages[1];
+        else
+          reply = "PRIVMSG " + username + this->_botMessages[2];
+        this->response(reply);
+      } else {
+        std::string username = strbuffer.substr(0, strbuffer.find("!"));
+        std::string reply = "PRIVMSG " + username + " :i cant help you loser";
+        this->response(reply);
+      }
+    }
   }
   return true;
 }
@@ -105,6 +128,7 @@ int main(int ac, char **av) {
   }
   Bot bot(myAtoi3(av[1]), av[2]);
 
+  srand((unsigned int)time(NULL));
   bot.connectToServer();
   return 0;
 }

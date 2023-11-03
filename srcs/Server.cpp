@@ -237,8 +237,10 @@ bool Server::getBasicInfo(int fd, std::string str) {
     this->_users[fd]->response("CAP * LS :multi-prefix sasl");
     std::cout << GRN SERVERSPEAK << NC ": " << this->_users[fd]->getNickname()
               << " is now registered" << std::endl;
-    std::string welcomeMssg = "001 " + this->_users[fd]->getNickname() +
-                              " :Welcome to our Internet Relay Network!";
+    std::string welcomeMssg =
+        "001 " + this->_users[fd]->getNickname() +
+        " :Welcome to our Internet Relay Network! If you need any help, /msg "
+        "Sunbot help";
     this->_users[fd]->response(welcomeMssg);
   }
   return true;
