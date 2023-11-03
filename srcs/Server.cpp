@@ -154,6 +154,18 @@ void Server::start() {
       }
     }
   }
+  this->response("QUIT :Server shutting down");
+}
+
+void Server::response(std::string message) {
+  std::string response = message + "\r\n";
+  for (std::map<int, User *>::iterator it = this->_users.begin();
+       it != this->_users.end(); ++it) {
+    if (send(it->first, response.c_str(), response.length(), 0) < 0) {
+      std::cout << RED SERVERSPEAK " Error: Send failed" NC << std::endl;
+      exit(EXIT_FAILURE);
+    }
+  }
 }
 
 void Server::readFromClient(int fd, int i) {

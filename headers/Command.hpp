@@ -81,8 +81,7 @@
   "221 " + client1 + " " + mode1 + " :" WHT "is your current mode" NC
 
 #define RPL_CHANNELMODEIS(client1, channel1, mode1)                            \
-  "324 " + client1 + " " + channel1 + " " + mode1 +                            \
-      " :" WHT "is current channel mode" NC
+  "324 " + client1 + " " + channel1 + " " + mode1
 
 #define RPL_NOTOPIC(client1, channel1)                                         \
   "331 " + client1 + " " + channel1 + " :" WHT "No topic is set" NC

@@ -49,6 +49,7 @@ public:
   int isInChannel(User *u);
   void removeUserFromChannel(User *u);
   void addOperator(User *u);
+  void removeOperator(User *u);
 
   void responseALL(std::string response);
   void responseALLnotMe(std::string response, std::string nick);

@@ -31,6 +31,12 @@ bool Mode::execute_differents_modes(User *client, std::vector<std::string> args,
     client->response(ERR_NEEDMOREPARAMS(client->getNickname(), args[1]));
     return false;
   }
+
+  if (client->isUserOperator(tmpChan) == false) {
+    client->response(ERR_CHANOPRIVSNEEDED(client->getNickname(), args[1]));
+    return false;
+  }
+
   while (args[2].length() > 0) {
     if (args[2][0] == 'i') {
       if (diff_mode == false) {
@@ -69,19 +75,17 @@ bool Mode::execute_differents_modes(User *client, std::vector<std::string> args,
               "@localhost MODE " + "#" + channel_l + " -l";
           tmpChan->sentMessageToAllMembers(modeChangeMessage_l);
         } else {
-          send(client->getFd(),
-               "limit can't be deleted because fonction is not activated\n", 58,
-               0);
+          client->response(
+              "limit can't be deleted because fonction is not activated");
           return false;
         }
       } else {
         if (args.size() != 4) {
-          std::cout << "construction : 'MODE <#channel> <mode> <limit>' "
-                    << std::endl;
+          client->response(ERR_NEEDMOREPARAMS(client->getNickname(), args[1]));
           return false;
         }
         if (tmpChan->findMode('l') == true) {
-          send(client->getFd(), "limit is already set\n", 22, 0);
+          client->response("limit is already set");
           return false;
         } else {
           if (args[3].length() > 0) {
@@ -129,7 +133,7 @@ bool Mode::execute_differents_modes(User *client, std::vector<std::string> args,
               "@localhost MODE " + "#" + channel_k + " -k";
           tmpChan->sentMessageToAllMembers(modeChangeMessage_k);
         } else {
-          send(client->getFd(), "password already unset\n", 24, 0);
+          client->response("password already unset");
           return false;
         }
       } else {
@@ -139,8 +143,7 @@ bool Mode::execute_differents_modes(User *client, std::vector<std::string> args,
           return false;
         }
         if (tmpChan->findMode('k') == true) {
-          send(client->getFd(),
-               "key already set , delete it if you want to change\n", 51, 0);
+          client->response("password already set");
           return false;
         } else {
           if (args[3].length() > 0) {
@@ -169,14 +172,13 @@ bool Mode::execute_differents_modes(User *client, std::vector<std::string> args,
               "@localhost MODE " + "#" + channel_t + " -t";
           tmpChan->sentMessageToAllMembers(modeChangeMessage_t);
         } else {
-          send(client->getFd(),
-               "topic can't be deleted because fonction is not activated\n", 59,
-               0);
+          client->response("topic can't be deleted because fonction is not "
+                           "activated");
           return false;
         }
       } else {
         if (tmpChan->findMode('t') == true) {
-          send(client->getFd(), "topic is already locked\n", 25, 0);
+          client->response("topic is already set");
           return false;
         } else {
           tmpChan->addMode('t');
@@ -210,6 +212,7 @@ bool Mode::execute_differents_modes(User *client, std::vector<std::string> args,
       if (diff_mode == false) {
         if (tmpUser->isUserOperator(FaketmpChan)) {
           tmpUser->removeChannelWhereUserIsOperator(FaketmpChan);
+          FaketmpChan->removeOperator(tmpUser);
           std::string channel_o = tmpChan->getChannelName();
           std::string modeChangeMessage_o =
               ":" + client->getNickname() + "!~" + client->getUsername() +
@@ -217,15 +220,16 @@ bool Mode::execute_differents_modes(User *client, std::vector<std::string> args,
               tmpUser->getNickname();
           tmpChan->sentMessageToAllMembers(modeChangeMessage_o);
         } else {
-          send(client->getFd(), "user is not operator\n", 21, 0);
+          client->response("user is not operator");
           return false;
         }
       } else {
         if (tmpUser->isUserOperator(FaketmpChan)) {
-          send(client->getFd(), "user is already operator\n", 25, 0);
+          client->response("user is already operator");
           return false;
         } else {
           tmpUser->addChannelWhereUserIsOperator(FaketmpChan);
+          FaketmpChan->addOperator(tmpUser);
           std::string channel_o2 = tmpChan->getChannelName();
           std::string modeChangeMessage_o2 =
               ":" + client->getNickname() + "!~" + client->getUsername() +
@@ -263,10 +267,6 @@ bool Mode::execute(User *client, std::vector<std::string> args) {
   }
   if (!tmpChan->isInChannel(client)) {
     client->response(ERR_NOTONCHANNEL(client->getNickname(), args[1]));
-    return false;
-  }
-  if (client->isUserOperator(tmpChan) == false) {
-    client->response(ERR_CHANOPRIVSNEEDED(client->getNickname(), args[1]));
     return false;
   }
   if (args.size() == 2) {

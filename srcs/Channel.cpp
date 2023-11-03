@@ -126,6 +126,16 @@ void Channel::responseALLnotMe(std::string response, std::string nick) {
   }
 }
 
+void Channel::removeOperator(User *u) {
+  for (std::vector<User *>::iterator it = _operators.begin();
+       it != _operators.end(); it++) {
+    if (*it == u) {
+      _operators.erase(it);
+      return;
+    }
+  }
+}
+
 void Channel::addOperator(User *u) { _operators.push_back(u); }
 
 /***\ SETTERS \***/

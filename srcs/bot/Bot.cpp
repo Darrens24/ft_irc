@@ -66,7 +66,9 @@ bool Bot::connectToServer() {
 
   this->response(everything);
 
-  while (1) {
+  bool server_up = true;
+
+  while (server_up) {
     char buffer[1024];
     memset(buffer, 0, 1024);
 
@@ -77,6 +79,7 @@ bool Bot::connectToServer() {
     }
 
     std::string strbuffer = buffer;
+    std::cout << "Server: " << strbuffer << std::endl;
 
     if (strbuffer.find("PRIVMSG") != std::string::npos) {
       strbuffer = strbuffer.substr(1, strbuffer.length());
@@ -97,6 +100,11 @@ bool Bot::connectToServer() {
         std::string reply = "PRIVMSG " + username + " :i cant help you loser";
         this->response(reply);
       }
+    } else if (strbuffer.find("QUIT :Server shutting down") !=
+               std::string::npos) {
+      std::cout << "on rentre" << std::endl;
+      server_up = false;
+      return false;
     }
   }
   return true;
@@ -104,7 +112,10 @@ bool Bot::connectToServer() {
 
 void Bot::response(std::string message) {
   std::string response = message + "\r\n";
-  send(this->_botSocket, response.c_str(), response.length(), 0);
+  if (send(this->_botSocket, response.c_str(), response.length(), 0) < 0) {
+    std::cout << RED "Error: Send failed" NC << std::endl;
+    exit(EXIT_FAILURE);
+  }
 }
 
 int myAtoi3(char *str) {

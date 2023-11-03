@@ -76,17 +76,10 @@ bool Kick::execute(User *client, std::vector<std::string> args) {
              tmpChan->getUsersOfChannel().begin();
          it != tmpChan->getUsersOfChannel().end(); it++) {
       if ((*it)->getNickname() == tmpUser->getNickname()) {
-        // std::string msg = "";
-        // if (reason == false)
-        //   msg = tmpUser->getNickname() + " has been kicked by " +
-        //         client->getNickname();
-        //
-        // else {
-        //   msg = tmpUser->getNickname() + " has been kicked by " +
-        //         client->getNickname() + " for " + args[3];
-        // }
-        // (*it)->response(msg);
         std::string chann = "#" + tmpChan->getChannelName();
+        for (int i = 3; i < (int)args.size(); i++) {
+          args[3] += " " + args[i];
+        }
         std::string mess = ":" + client->getNickname() + "!" +
                            client->getUsername() + "@" + client->getHostname() +
                            " KICK " + chann + " " + tmpUser->getNickname() +

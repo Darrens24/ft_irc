@@ -83,6 +83,7 @@ public:
   // commands
   void removeUserFromServer(int i);
   void removeUserFromChannelDB(int i);
+  void response(std::string message);
 
   // channels
   int createChannel(std::string name, User *u);
