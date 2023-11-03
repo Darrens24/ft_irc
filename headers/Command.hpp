@@ -108,6 +108,13 @@ public:
   bool addKey(User *client, std::vector<std::string> keys,
               std::map<std::string, std::string> &channel_key,
               std::vector<std::string> allchannels);
+  bool errorJoiningChannel(User *client,
+                           std::map<std::string, std::string>::iterator it,
+                           std::map<std::string, Channel *>::iterator iter);
+  void joinExistingChannel(User *client,
+                           std::map<std::string, Channel *>::iterator iter);
+  void joinNewChannel(User *client,
+                      std::map<std::string, std::string>::iterator it);
   bool execute(User *client, std::vector<std::string> args);
 };
 

@@ -37,6 +37,112 @@ bool Join::addKey(User *client, std::vector<std::string> keys,
   return true;
 }
 
+bool Join::errorJoiningChannel(
+    User *client, std::map<std::string, std::string>::iterator it,
+    std::map<std::string, Channel *>::iterator iter) {
+  if (iter->second->isInChannel(client)) {
+    client->response(ERR_USERONCHANNEL(client->getNickname(),
+                                       client->getNickname(),
+                                       iter->second->getChannelName()));
+    return true;
+  }
+  if (it->second != iter->second->getKey()) {
+    client->response(ERR_BADCHANNELKEY(client->getNickname(),
+                                       iter->second->getChannelName()));
+    return true;
+  }
+  if (iter->second->findMode('l')) {
+    if (iter->second->getNumberofUsers() >= iter->second->getLimit()) {
+      client->response(ERR_CHANNELISFULL(client->getNickname(),
+                                         iter->second->getChannelName()));
+      return true;
+    }
+  }
+  if (iter->second->findMode('i') == true) {
+    if (client->isInvited(iter->second) == false) {
+      client->response(ERR_INVITEONLYCHAN(client->getNickname(),
+                                          iter->second->getChannelName()));
+      return true;
+    }
+  }
+  return false;
+}
+
+void Join::joinExistingChannel(
+    User *client, std::map<std::string, Channel *>::iterator iter) {
+
+  iter->second->addUser(client);
+
+  std::string chan = "#" + iter->first;
+  std::string welcome = ":" + client->getNickname() + "!~" +
+                        client->getUsername() + "@localhost JOIN " + chan;
+  std::string mode = ":" + client->getNickname() + "!~" +
+                     client->getNickname() + "@localhost MODE " + chan + " +v";
+
+  iter->second->responseALL(welcome);
+  client->response(RPL_TOPIC(client->getNickname(), chan));
+
+  std::vector<User *> tmpUsers = iter->second->getUsersOfChannel();
+  std::string stringUsers = "";
+  std::vector<Channel *> tmpChannels = client->getChannelsWhereUserIsOperator();
+  Channel *tmpChannel = iter->second;
+
+  for (std::vector<User *>::iterator it = tmpUsers.begin();
+       it != tmpUsers.end(); it++) {
+    if (tmpChannel->isOperator(*it)) {
+      stringUsers += "@" + (*it)->getNickname() + " ";
+    } else {
+      stringUsers += (*it)->getNickname() + " ";
+    }
+  }
+
+  iter->second->responseALL(
+      RPL_NAMREPLY(client->getUsername(), "=", chan, stringUsers));
+  iter->second->responseALL(RPL_ENDOFNAMES(client->getNickname(), chan));
+  client->response(mode);
+}
+
+void Join::joinNewChannel(User *client,
+                          std::map<std::string, std::string>::iterator it) {
+  Channel *newChannel = new Channel(it->first);
+
+  newChannel->addUser(client);
+  newChannel->addOperator(client);
+  client->addChannelWhereUserIsOperator(newChannel);
+  newChannel->setKey(it->second);
+  if (it->second != "") {
+    newChannel->addMode('k');
+    std::cout << "mode +k added because key is set" << std::endl;
+  }
+
+  newChannel->setOwner(client);
+  _srv->getChannel().insert(
+      std::pair<std::string, Channel *>(it->first, newChannel));
+  std::cout << BLU CLIENTSPEAK(this->_srv->getUserPort(client->getFd()))
+            << NC ": Created the channel " << BLU
+            << newChannel->getChannelName() << NC << std::endl;
+
+  std::string chan = "#" + it->first;
+  std::string welcome = ":" + client->getNickname() + "!~" +
+                        client->getUsername() + "@localhost JOIN " + chan;
+  std::string mode = ":" + client->getNickname() + "!~" +
+                     client->getNickname() + "@localhost MODE " + chan + " +v";
+
+  client->response(welcome);
+  client->response(RPL_TOPIC(client->getNickname(), chan));
+
+  std::vector<User *> tmpUsers = newChannel->getUsersOfChannel();
+  std::string stringUsers = "";
+
+  for (std::vector<User *>::iterator it = tmpUsers.begin();
+       it != tmpUsers.end(); it++) {
+    stringUsers += "@" + (*it)->getNickname() + " ";
+  }
+  client->response(RPL_NAMREPLY(client->getUsername(), "=", chan, stringUsers));
+  client->response(RPL_ENDOFNAMES(client->getNickname(), chan));
+  client->response(mode);
+}
+
 bool Join::execute(User *client, std::vector<std::string> args) {
 
   if (args.size() < 2 || args.size() > 4) {
@@ -58,7 +164,6 @@ bool Join::execute(User *client, std::vector<std::string> args) {
     return false;
   }
 
-  // check if channel exists
   for (std::map<std::string, std::string>::iterator it = channel_key.begin();
        it != channel_key.end(); it++) {
     found_channel = false;
@@ -67,103 +172,15 @@ bool Join::execute(User *client, std::vector<std::string> args) {
          iter != _srv->getChannel().end(); iter++) {
       if (iter->first == it->first) {
         found_channel = true;
-        if (iter->second->isInChannel(client)) {
-          client->response(ERR_USERONCHANNEL(client->getNickname(),
-                                             client->getNickname(),
-                                             iter->second->getChannelName()));
+        if (errorJoiningChannel(client, it, iter) == true) {
           break;
         }
-        if (it->second != iter->second->getKey()) {
-          client->response(ERR_BADCHANNELKEY(client->getNickname(),
-                                             iter->second->getChannelName()));
-          break;
-        }
-        if (iter->second->findMode('l')) {
-          if (iter->second->getNumberofUsers() >= iter->second->getLimit()) {
-            client->response(ERR_CHANNELISFULL(client->getNickname(),
-                                               iter->second->getChannelName()));
-            break;
-          }
-        }
-        if (iter->second->findMode('i') == true) {
-          if (client->isInvited(iter->second) == false) {
-            client->response(ERR_INVITEONLYCHAN(
-                client->getNickname(), iter->second->getChannelName()));
-            break;
-          }
-        }
-        iter->second->addUser(client);
-        std::string chan = "#" + iter->first;
-        std::string welcome = ":" + client->getNickname() + "!~" +
-                              client->getUsername() + "@localhost JOIN " + chan;
-        std::string mode = ":" + client->getNickname() + "!~" +
-                           client->getNickname() + "@localhost MODE " + chan +
-                           " +v";
-
-        iter->second->responseALL(welcome);
-        client->response(RPL_TOPIC(client->getNickname(), chan));
-
-        std::vector<User *> tmpUsers = iter->second->getUsersOfChannel();
-        std::string stringUsers = "";
-        std::vector<Channel *> tmpChannels =
-            client->getChannelsWhereUserIsOperator();
-        Channel *tmpChannel = iter->second;
-
-        for (std::vector<User *>::iterator it = tmpUsers.begin();
-             it != tmpUsers.end(); it++) {
-          if (tmpChannel->isOperator(*it)) {
-            stringUsers += "@" + (*it)->getNickname() + " ";
-          } else {
-            stringUsers += (*it)->getNickname() + " ";
-          }
-        }
-
-        iter->second->responseALL(
-            RPL_NAMREPLY(client->getUsername(), "=", chan, stringUsers));
-        iter->second->responseALL(RPL_ENDOFNAMES(client->getNickname(), chan));
-        client->response(mode);
+        this->joinExistingChannel(client, iter);
         break;
       }
     }
-
-    if (found_channel == false) {
-      Channel *newChannel = new Channel(it->first);
-
-      newChannel->addUser(client);
-      newChannel->addOperator(client);
-      client->addChannelWhereUserIsOperator(newChannel);
-      newChannel->setKey(it->second);
-      if (it->second != "") {
-        newChannel->addMode('k');
-        std::cout << "mode +k added because key is set" << std::endl;
-      }
-      newChannel->setOwner(client);
-      _srv->getChannel().insert(
-          std::pair<std::string, Channel *>(it->first, newChannel));
-      std::cout << BLU CLIENTSPEAK(this->_srv->getUserPort(client->getFd()))
-                << W ": Created the channel " << newChannel->getChannelName()
-                << NC << std::endl;
-      std::string chan = "#" + it->first;
-      std::string welcome = ":" + client->getNickname() + "!~" +
-                            client->getUsername() + "@localhost JOIN " + chan;
-      std::string mode = ":" + client->getNickname() + "!~" +
-                         client->getNickname() + "@localhost MODE " + chan +
-                         " +v";
-      client->response(welcome);
-      client->response(RPL_TOPIC(client->getNickname(), chan));
-
-      std::vector<User *> tmpUsers = newChannel->getUsersOfChannel();
-      std::string stringUsers = "";
-
-      for (std::vector<User *>::iterator it = tmpUsers.begin();
-           it != tmpUsers.end(); it++) {
-        stringUsers += "@" + (*it)->getNickname() + " ";
-      }
-      client->response(
-          RPL_NAMREPLY(client->getUsername(), "=", chan, stringUsers));
-      client->response(RPL_ENDOFNAMES(client->getNickname(), chan));
-      client->response(mode);
-    }
+    if (found_channel == false)
+      this->joinNewChannel(client, it);
   }
   return true;
 }
