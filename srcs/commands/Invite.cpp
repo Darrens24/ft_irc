@@ -52,4 +52,3 @@ bool Invite::execute(User *client, std::vector<std::string> args) {
 
   return true;
 }
-

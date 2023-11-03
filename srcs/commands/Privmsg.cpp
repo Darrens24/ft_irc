@@ -39,8 +39,9 @@ void Privmsg::SendPrivateMessage(User *client, std::string target,
       std::string msg;
       for (long unsigned int i = 2; i < args.size(); i++)
         msg += args[i] + " ";
-      std::string message = ":" + client->getNickname() + "!~" +
-                            client->getNickname() + "@localhost PRIVMSG " +
+      msg = msg.substr(0, msg.size() - 1);
+      std::string message = ":" + client->getNickname() + "!" +
+                            client->getUsername() + "@localhost PRIVMSG " +
                             (*it)->getNickname() + " " + msg;
       (*it)->response(message);
       return;

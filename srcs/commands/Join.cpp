@@ -77,10 +77,12 @@ void Join::joinExistingChannel(
   std::string welcome = ":" + client->getNickname() + "!~" +
                         client->getUsername() + "@localhost JOIN " + chan;
   std::string mode = ":" + client->getNickname() + "!~" +
-                     client->getNickname() + "@localhost MODE " + chan + " +v";
+                     client->getNickname() + "@localhost MODE " + chan +
+                     iter->second->getModeString();
 
   iter->second->responseALL(welcome);
-  client->response(RPL_TOPIC(client->getNickname(), chan));
+  client->response(
+      RPL_TOPIC(client->getNickname(), chan, iter->second->getTopic()));
 
   std::vector<User *> tmpUsers = iter->second->getUsersOfChannel();
   std::string stringUsers = "";
@@ -126,10 +128,10 @@ void Join::joinNewChannel(User *client,
   std::string welcome = ":" + client->getNickname() + "!~" +
                         client->getUsername() + "@localhost JOIN " + chan;
   std::string mode = ":" + client->getNickname() + "!~" +
-                     client->getNickname() + "@localhost MODE " + chan + " +v";
+                     client->getNickname() + "@localhost MODE " + chan +
+                     newChannel->getModeString();
 
   client->response(welcome);
-  client->response(RPL_TOPIC(client->getNickname(), chan));
 
   std::vector<User *> tmpUsers = newChannel->getUsersOfChannel();
   std::string stringUsers = "";
@@ -144,7 +146,6 @@ void Join::joinNewChannel(User *client,
 }
 
 bool Join::execute(User *client, std::vector<std::string> args) {
-
   if (args.size() < 2 || args.size() > 4) {
     client->response(ERR_NEEDMOREPARAMS(client->getNickname(), "JOIN"));
     return false;

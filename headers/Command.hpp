@@ -38,8 +38,8 @@
 #define RPL_ENDOFNAMES(client1, channel1)                                      \
   "366 " + client1 + " " + channel1 + " :" WHT "End of /NAMES list" NC
 
-#define RPL_TOPIC(client1, channel1)                                           \
-  "332 " + client1 + " " + channel1 + " :" WHT "topics" NC
+#define RPL_TOPIC(client1, channel1, topic1)                                   \
+  "332 " + client1 + " " + channel1 + " :" + topic1
 
 #define ERR_NOSUCHCHANNEL(client1, channel1)                                   \
   "403 " + client1 + " " + channel1 + " :" WHT "No such channel" NC
@@ -83,6 +83,12 @@
 #define RPL_CHANNELMODEIS(client1, channel1, mode1)                            \
   "324 " + client1 + " " + channel1 + " " + mode1 +                            \
       " :" WHT "is current channel mode" NC
+
+#define RPL_NOTOPIC(client1, channel1)                                         \
+  "331 " + client1 + " " + channel1 + " :" WHT "No topic is set" NC
+
+#define RPL_TOPICIS(client1, channel1, topic1)                                 \
+  "332 " + client1 + " " + channel1 + " :" WHT "Topic is " + topic1 + NC
 
 class Server;
 
