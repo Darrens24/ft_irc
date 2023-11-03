@@ -79,7 +79,6 @@ bool Bot::connectToServer() {
     }
 
     std::string strbuffer = buffer;
-    std::cout << "Server: " << strbuffer << std::endl;
 
     if (strbuffer.find("PRIVMSG") != std::string::npos) {
       strbuffer = strbuffer.substr(1, strbuffer.length());
@@ -102,7 +101,6 @@ bool Bot::connectToServer() {
       }
     } else if (strbuffer.find("QUIT :Server shutting down") !=
                std::string::npos) {
-      std::cout << "on rentre" << std::endl;
       server_up = false;
       return false;
     }

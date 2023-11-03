@@ -7,7 +7,7 @@ Invite::~Invite() {}
 // INVITE <nickname> <#channel>
 
 bool Invite::execute(User *client, std::vector<std::string> args) {
-  if (args.size() < 3) {
+  if (args.size() != 3) {
     client->response(ERR_NEEDMOREPARAMS(client->getNickname(), "INVITE"));
     return false;
   }

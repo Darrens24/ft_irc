@@ -19,7 +19,7 @@ std::vector<std::string> myOwnSplit_kick(std::string str, std::string sep) {
 }
 
 bool Kick::execute(User *client, std::vector<std::string> args) {
-  if (args.size() < 3 || args.size() > 4) {
+  if (args.size() < 3) {
     client->response(ERR_NEEDMOREPARAMS(client->getNickname(), "KICK"));
     return false;
   }
@@ -30,11 +30,9 @@ bool Kick::execute(User *client, std::vector<std::string> args) {
     client->response("construction : 'KICK #channelname username [:reason]'");
     return false;
   }
-  // bool reason = false;
   if (args.size() == 4 && args[3].length() > 0) {
     if (args[3][0] == ':') {
       args[3].erase(0, 1);
-      // reason = true;
     } else {
       client->response(ERR_NEEDMOREPARAMS(client->getNickname(), "KICK"));
       client->response("construction : 'KICK #channelname username [:reason]'");
@@ -77,13 +75,13 @@ bool Kick::execute(User *client, std::vector<std::string> args) {
          it != tmpChan->getUsersOfChannel().end(); it++) {
       if ((*it)->getNickname() == tmpUser->getNickname()) {
         std::string chann = "#" + tmpChan->getChannelName();
-        for (int i = 3; i < (int)args.size(); i++) {
+        for (int i = 4; i < (int)args.size(); i++) {
           args[3] += " " + args[i];
         }
         std::string mess = ":" + client->getNickname() + "!" +
                            client->getUsername() + "@" + client->getHostname() +
                            " KICK " + chann + " " + tmpUser->getNickname() +
-                           " :" + args[3];
+                           " " + args[3];
         tmpChan->sentMessageToAllMembers(mess);
         tmpChan->getUsersOfChannel().erase(it);
         found_user = true;
