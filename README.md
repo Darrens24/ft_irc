@@ -19,7 +19,7 @@
 
 - **C++ Programming**: Core implementation in C++, the first big c++ project of the curriculum.
 - **Network Programming**: Extensive use of socket programming and Unix network APIs.
-- **Multithreading/Multiprocessing**: Utilization of multithreading/multiprocessing concepts to handle concurrent client connections.
+- **File Descriptors Poll**: Utilization of poll/poll_fd to manage multiple client connections and requests.
 
 ## Challenges Faced
 
